@@ -62,7 +62,8 @@ model User {
   organization Organization @relation(fields: [orgId], references: [id])
 
   sessions Session[]
-  jobs     Job[]
+  createdJobs Job[] @relation("JobCreatedBy")
+  updatedJobs Job[] @relation("JobUpdatedBy")
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -101,13 +102,16 @@ model Job {
   experienceMin  Int?
   experienceMax  Int?
 
-  embedding Unsupported("vector")
+  embedding Unsupported("vector")?
 
   orgId        String
   organization Organization @relation(fields: [orgId], references: [id])
 
   createdBy String
-  creator   User   @relation(fields: [createdBy], references: [id])
+  creator   User @relation("JobCreatedBy", fields: [createdBy], references: [id])
+
+  updatedBy String?
+  updater   User? @relation("JobUpdatedBy", fields: [updatedBy], references: [id])
 
   applications Application[]
 
