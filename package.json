@@ -25,6 +25,7 @@
   "homepage": "https://github.com/icg-expert/hire-ai-backend#readme",
   "dependencies": {
     "@prisma/client": "^5.22.0",
+    "bcrypt": "^6.0.0",
     "cors": "^2.8.6",
     "dotenv": "^17.4.2",
     "express": "^5.2.1",

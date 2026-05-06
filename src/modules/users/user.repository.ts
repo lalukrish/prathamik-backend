@@ -1,9 +1,10 @@
-import { PrismaClient, User } from "@prisma/client";
-
-const prisma = new PrismaClient();
+import { prisma } from "../../config/db";
 
 export const userRepository = {
-  findByEmail: async (email: string): Promise<User | null> => {
-    return prisma.user.findUnique({ where: { email } });
+  findByUserId: async (id: string) => {
+    return prisma.user.findUnique({ where: { id } });
+  },
+  createUser: async (data: any) => {
+    return prisma.user.create({ data });
   },
 };
