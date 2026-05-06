@@ -1,9 +1,9 @@
 import { Router } from "express";
-import { refresh, logout } from "./auth.controller";
+import { clearAuth, refresh,  } from "./auth.controller";
 
 const router = Router();
 
 router.post("/refresh", refresh);
-router.post("/logout", logout);
+router.post("/cleartoken", clearAuth);
 
 export default router;

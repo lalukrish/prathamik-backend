@@ -48,7 +48,7 @@ export const refresh = async (req: Request, res: Response) => {
 };
 
 // LOGOUT
-export const logout = (req: Request, res: Response) => {
+export const clearAuth = (req: Request, res: Response) => {
     clearAuthCookies(res);
     return res.json({ success: true });
 };
