@@ -5,6 +5,7 @@ import {
     verifyRefreshToken,
 } from "./auth.service";
 import { setAuthCookies, clearAuthCookies } from "./auth.cookie";
+import { getUserById } from "./auth.repository";
 
 // REFRESH
 export const refresh = async (req: Request, res: Response) => {
@@ -25,8 +26,21 @@ export const refresh = async (req: Request, res: Response) => {
 
     const userId = result.decoded!.userId;
 
-    const newAccessToken = generateAccessToken({ userId });
-    const newRefreshToken = generateRefreshToken({ userId });
+    const user = await getUserById(userId);
+
+    if (!user) {
+        return res.status(404).json({ message: "User not found" });
+    }
+
+    const newAccessToken = generateAccessToken({
+        id: user.id,
+        orgId: user.orgId,
+        role: user.role,
+    });
+
+    const newRefreshToken = generateRefreshToken({
+        userId: user.id,
+    });
 
     setAuthCookies(res, newAccessToken, newRefreshToken);
 

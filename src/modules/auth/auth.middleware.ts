@@ -2,7 +2,7 @@ import { Request, Response, NextFunction } from "express";
 import { verifyAccessToken } from "./auth.service";
 
 export const authMiddleware = (
-    req: Request,
+    req: any,
     res: Response,
     next: NextFunction
 ) => {
