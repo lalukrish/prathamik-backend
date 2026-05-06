@@ -1,0 +1,267 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+//////////////////////////////////////////////////////
+// ENUMS
+//////////////////////////////////////////////////////
+
+enum Role {
+  super_admin
+  hr_manager
+  recruiter
+}
+
+enum Source {
+  applied
+  manual
+}
+
+enum ApplicationStatus {
+  APPLIED
+  SHORTLISTED
+  REJECTED
+  INTERVIEW
+}
+
+enum ProcessingStatus {
+  QUEUED
+  PROCESSING
+  COMPLETED
+  FAILED
+}
+
+model Organization {
+  id   String @id @default(uuid())
+  name String
+
+  users      User[]
+  jobs       Job[]
+  candidates Candidate[] // important
+
+  createdAt DateTime @default(now())
+}
+
+//////////////////////////////////////////////////////
+// USERS
+//////////////////////////////////////////////////////
+
+model User {
+  id       String  @id @default(uuid())
+  name     String?
+  email    String  @unique
+  password String
+  role     Role
+
+  orgId        String
+  organization Organization @relation(fields: [orgId], references: [id])
+
+  sessions Session[]
+  jobs     Job[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+//////////////////////////////////////////////////////
+// SESSIONS
+//////////////////////////////////////////////////////
+
+model Session {
+  id     String @id @default(uuid())
+  userId String
+  user   User   @relation(fields: [userId], references: [id])
+
+  device    String?
+  ipAddress String?
+  userAgent String?
+
+  isActive  Boolean   @default(true)
+  expiresAt DateTime?
+
+  createdAt DateTime @default(now())
+}
+
+//////////////////////////////////////////////////////
+// JOBS
+//////////////////////////////////////////////////////
+
+model Job {
+  id          String @id @default(uuid())
+  title       String
+  description String
+
+  requiredSkills String[]
+  niceToHave     String[]
+  experienceMin  Int?
+  experienceMax  Int?
+
+  embedding Unsupported("vector")
+
+  orgId        String
+  organization Organization @relation(fields: [orgId], references: [id])
+
+  createdBy String
+  creator   User   @relation(fields: [createdBy], references: [id])
+
+  applications Application[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+//////////////////////////////////////////////////////
+// CANDIDATES
+//////////////////////////////////////////////////////
+
+model Candidate {
+  id    String  @id @default(uuid())
+  name  String?
+  email String?
+  phone String?
+
+  orgId        String
+  organization Organization @relation(fields: [orgId], references: [id])
+
+  resumes      Resume[]
+  applications Application[]
+
+  createdAt DateTime @default(now())
+}
+
+//////////////////////////////////////////////////////
+// RESUMES (IMPORTANT 🔥)
+//////////////////////////////////////////////////////
+
+model Resume {
+  id          String    @id @default(uuid())
+  candidateId String
+  candidate   Candidate @relation(fields: [candidateId], references: [id])
+
+  fileUrl  String
+  fileName String?
+  fileSize Int?
+
+  applications Application[]
+
+  createdAt DateTime @default(now())
+}
+
+//////////////////////////////////////////////////////
+// APPLICATIONS (CORE 🔥)
+//////////////////////////////////////////////////////
+
+model Application {
+  id String @id @default(uuid())
+
+  jobId String
+  job   Job    @relation(fields: [jobId], references: [id])
+
+  candidateId String
+  candidate   Candidate @relation(fields: [candidateId], references: [id])
+
+  resumeId String?
+  resume   Resume? @relation(fields: [resumeId], references: [id])
+
+  source Source
+
+  status     ApplicationStatus @default(APPLIED)
+  processing ProcessingStatus  @default(QUEUED)
+
+  overallScore Int?
+  aiSummary    String?
+  parsedData   Json?
+
+  matchedSkills String[]
+  missingSkills String[]
+
+  embedding Unsupported("vector")
+
+  logs      ProcessingLog[]
+  interview Interview?
+  scores    CandidateScore?
+
+  createdAt DateTime @default(now())
+
+  @@unique([jobId, candidateId])
+}
+
+//////////////////////////////////////////////////////
+// PROCESSING LOGS
+//////////////////////////////////////////////////////
+
+model ProcessingLog {
+  id            String      @id @default(uuid())
+  applicationId String
+  application   Application @relation(fields: [applicationId], references: [id])
+
+  step    String
+  status  String
+  message String?
+
+  createdAt DateTime @default(now())
+}
+
+//////////////////////////////////////////////////////
+// INTERVIEWS (PHASE 2)
+//////////////////////////////////////////////////////
+
+model Interview {
+  id String @id @default(uuid())
+
+  applicationId String      @unique
+  application   Application @relation(fields: [applicationId], references: [id])
+
+  status String
+
+  cheatScore   Int?
+  overallScore Int?
+
+  startedAt   DateTime?
+  completedAt DateTime?
+
+  questions InterviewQuestion[]
+
+  createdAt DateTime @default(now())
+}
+
+//////////////////////////////////////////////////////
+// INTERVIEW QUESTIONS
+//////////////////////////////////////////////////////
+
+model InterviewQuestion {
+  id String @id @default(uuid())
+
+  interviewId String
+  interview   Interview @relation(fields: [interviewId], references: [id])
+
+  questionText String
+  type         String
+  options      Json?
+  correct      Json?
+
+  createdAt DateTime @default(now())
+}
+
+//////////////////////////////////////////////////////
+// CANDIDATE SCORES
+//////////////////////////////////////////////////////
+
+model CandidateScore {
+  id String @id @default(uuid())
+
+  applicationId String      @unique
+  application   Application @relation(fields: [applicationId], references: [id])
+
+  resumeScore    Int?
+  interviewScore Int?
+  cheatScore     Int?
+  overallScore   Int?
+
+  createdAt DateTime @default(now())
+}
