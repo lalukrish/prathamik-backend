@@ -1,8 +1,8 @@
 import { Request, Response, NextFunction } from "express";
-import { verifyAccessToken } from "../modules/auth/auth.service";      
-import { authRepository } from "../modules/auth/auth.repository";     
+import { verifyAccessToken } from "../modules/auth/auth.service";
+import { authRepository } from "../modules/auth/auth.repository";
 import { AccessTokenPayload } from "../modules/auth/auth.types";
-
+import { prisma } from "../config/db";
 
 export const authMiddleware = async (req: Request, res: Response, next: NextFunction) => {
     const authHeader = req.headers.authorization;
@@ -11,7 +11,7 @@ export const authMiddleware = async (req: Request, res: Response, next: NextFunc
     }
 
     const token = authHeader.split(" ")[1];
-    console.log(token,"token")
+    console.log(token, "token")
     const result = verifyAccessToken(token);
 
     if (!result.valid) {
@@ -22,9 +22,22 @@ export const authMiddleware = async (req: Request, res: Response, next: NextFunc
     }
 
     const session = await authRepository.findSessionById(result.decoded!.sessionId);
+
+
     if (!session) {
         return res.status(401).json({ success: false, message: "Session ended, please login again" });
     }
+
+    await prisma.session.update({
+        where: {
+            userId: result.decoded!.id,
+            id: session.id,
+        },
+
+        data: {
+            lastActiveAt: new Date(),
+        },
+    });
 
     req.user = result.decoded!;
     next();
