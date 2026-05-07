@@ -27,4 +27,16 @@ export const userService = {
 
     return user;
   },
+  updateUser: async (id: string, data: UserData) => {
+    const existing = await userRepository.findByUserId(id);
+
+    if (!existing) {
+      throw new Error("User doesn't exists");
+    }
+    const user = await userRepository.updateUser(id, {
+      ...data,
+    });
+
+    return user;
+  },
 };

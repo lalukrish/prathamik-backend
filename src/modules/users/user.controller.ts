@@ -28,6 +28,25 @@ export class UserController {
       res.status(400).json({ error: err.message });
     }
   };
+  updateUser = async (req: Request<{ id: string }, any>, res: Response) => {
+    try {
+      const { id } = req.params;
+
+      if (!id) {
+        res.status(400).json({ error: "User ID is required" });
+        return;
+      }
+      console.log("body data", id, req.body);
+      const user = await userService.updateUser(id, req.body);
+
+      res.json({ success: true, data: user });
+    } catch (err: any) {
+      console.error(err);
+      res.status(500).json({
+        error: err.message || "Failed to update user",
+      });
+    }
+  };
 }
 
 export const userController = new UserController();

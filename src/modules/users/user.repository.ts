@@ -7,4 +7,10 @@ export const userRepository = {
   createUser: async (data: any) => {
     return prisma.user.create({ data });
   },
+  updateUser(id: string, data: any) {
+    return prisma.user.update({
+      where: { id },
+      data,
+    });
+  },
 };
