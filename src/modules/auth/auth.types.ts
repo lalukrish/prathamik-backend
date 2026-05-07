@@ -14,5 +14,18 @@ export interface AuthUser {
 
 export interface AuthResponse {
     user: AuthUser;
-    token: string;
+    accessToken: string;
+    refreshToken: string;
+}
+
+export interface AccessTokenPayload {
+    id: string;       
+    orgId: string;
+    role: string;
+    sessionId: string;
+}
+
+export interface RefreshTokenPayload {
+    id: string;
+    sessionId: string;
 }
