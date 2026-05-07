@@ -3,7 +3,7 @@ import { userService } from "./user.service";
 import { UserData } from "./user.types";
 
 export class UserController {
-  getSingleUserById = async (req: Request, res: Response) => {
+  getSingleUserById = async (req: Request<{ id: string }>, res: Response) => {
     try {
       const { id } = req.params;
 
