@@ -13,4 +13,12 @@ export const userRepository = {
       data,
     });
   },
+  updateUserInActive(id: string, isActive: boolean) {
+    return prisma.user.update({
+      where: { id },
+      data: {
+        isActive: false,
+      },
+    });
+  },
 };

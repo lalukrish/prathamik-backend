@@ -45,6 +45,26 @@ export class UserController {
       });
     }
   };
+  softDeleteUser = async (req: Request<{ id: string }>, res: Response) => {
+    try {
+      console.log("first?>>>");
+
+      const { id } = req.params;
+      const { isActive } = req.body;
+      console.log("first", isActive);
+      if (!id) {
+        res.status(400).json({ error: "User ID is required" });
+        return;
+      }
+      const user = await userService.deleteSoft(id, isActive);
+
+      res.json({ success: true, data: user });
+    } catch (err: any) {
+      res.status(500).json({
+        error: err.message || "Failed to update user",
+      });
+    }
+  };
 }
 
 export const userController = new UserController();

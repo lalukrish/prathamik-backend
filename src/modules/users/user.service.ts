@@ -39,4 +39,12 @@ export const userService = {
 
     return user;
   },
+  deleteSoft: async (id: string, isActive: boolean) => {
+    const existing = await userRepository.findByUserId(id);
+    if (!existing) {
+      throw new Error("User doesn't exists");
+    }
+    const user = await userRepository.updateUserInActive(id, isActive);
+    return user;
+  },
 };
