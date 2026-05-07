@@ -1,5 +1,6 @@
 import { Request, Response } from "express";
 import { authService } from "./auth.service";
+import { normalizeIP } from "../../utils/ip";
 
 export const authController = {
   async login(req: Request, res: Response) {
@@ -35,7 +36,7 @@ export const authController = {
       }
 
       const result = await authService.login(req.body, {
-        ip: req.ip,
+        ip: normalizeIP(req.ip),
         userAgent,
         device,
       });
