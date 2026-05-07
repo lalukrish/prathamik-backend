@@ -1,21 +1,19 @@
-export interface CreateJobDTO {
-    title: string;
-    description: string;
+import { z } from "zod";
 
-    requiredSkills: string[];
-    niceToHave: string[];
+export const createJobSchema = z.object({
+    title: z.string().min(2),
 
-    experienceMin?: number;
-    experienceMax?: number;
-}
+    jdHtml: z.string().min(10),
 
-export interface UpdateJobDTO {
-    title?: string;
-    description?: string;
+    requiredSkills: z.array(z.string()).default([]),
+    niceToHave: z.array(z.string()).default([]),
 
-    requiredSkills?: string[];
-    niceToHave?: string[];
+    experienceMin: z.number().optional(),
+    experienceMax: z.number().optional(),
+});
 
-    experienceMin?: number;
-    experienceMax?: number;
-}
+export type CreateJobDTO = z.infer<typeof createJobSchema>;
+
+export const updateJobSchema = createJobSchema.partial();
+
+export type UpdateJobDTO = z.infer<typeof updateJobSchema>;
