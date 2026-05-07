@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
 import { JobService } from "./job.service";
 import { CreateJobDTO, UpdateJobDTO } from "./job.types";
-import { logger } from "../../utils/logger";
+import { logger } from "../../config/logger";
 
 const jobService = new JobService();
 
