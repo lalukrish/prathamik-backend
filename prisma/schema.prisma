@@ -62,7 +62,7 @@ model User {
   organization Organization @relation(fields: [orgId], references: [id])
   isActive Boolean @default(true)
   sessions Session[]
-  refereshToken String?
+
   createdJobs Job[] @relation("JobCreatedBy")
   updatedJobs Job[] @relation("JobUpdatedBy")
 
@@ -79,14 +79,19 @@ model Session {
   userId String
   user   User   @relation(fields: [userId], references: [id])
 
+  tokenHash String @unique   // referesh token jwt convert to hash
+
   device    String?
   ipAddress String?
   userAgent String?
 
   isActive  Boolean   @default(true)
-  expiresAt DateTime?
+  expiresAt DateTime  // ❗ make required
 
   createdAt DateTime @default(now())
+
+  @@index([userId])
+  @@index([tokenHash])
 }
 
 //////////////////////////////////////////////////////
