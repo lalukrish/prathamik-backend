@@ -1,6 +1,7 @@
 import cookieParser from "cookie-parser";
 import express from "express";
 import routes from "./routes";
+import { logger } from "./utils/logger";
 
 const app = express();
 

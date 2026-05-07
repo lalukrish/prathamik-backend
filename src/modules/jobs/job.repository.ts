@@ -7,16 +7,23 @@ export class JobRepository {
         });
     }
 
-    async findAll(orgId: string) {
+    async findAll(orgId: string, skip: number, limit: number) {
         return prisma.job.findMany({
             where: { orgId },
             orderBy: { createdAt: "desc" },
+            skip,
+            take: limit,
         });
     }
 
-    async findById(id: string) {
+    async count(orgId: string) {
+        return prisma.job.count({
+            where: { orgId },
+        });
+    }
+    async findById(id: string, orgId: string) {
         return prisma.job.findUnique({
-            where: { id },
+            where: { id, orgId },
         });
     }
 
@@ -27,9 +34,9 @@ export class JobRepository {
         });
     }
 
-    async delete(id: string) {
+    async delete(id: string, orgId: string) {
         return prisma.job.delete({
-            where: { id },
+            where: { id, orgId },
         });
     }
 }
