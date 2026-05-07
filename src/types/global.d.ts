@@ -1,4 +1,3 @@
-import { AccessTokenPayload } from "../modules/auth/auth.types";
 import { Request } from "express";
 
 declare global {
@@ -10,7 +9,7 @@ declare global {
         }
 
         interface Request {
-            user: AccessTokenPayload;
+            user: UserPayload;
         }
     }
 }
