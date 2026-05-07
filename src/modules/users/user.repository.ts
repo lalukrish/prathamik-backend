@@ -16,9 +16,15 @@ export const userRepository = {
   updateUserInActive(id: string, isActive: boolean) {
     return prisma.user.update({
       where: { id },
-
       data: {
         isActive,
+      },
+    });
+  },
+  findAllUser: async () => {
+    return prisma.user.findMany({
+      where: {
+        isActive: true,
       },
     });
   },

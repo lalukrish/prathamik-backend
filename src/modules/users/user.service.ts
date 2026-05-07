@@ -47,4 +47,8 @@ export const userService = {
     const user = await userRepository.updateUserInActive(id, isActive);
     return user;
   },
+  getAllUsers: async () => {
+    const users = await userRepository.findAllUser();
+    return users;
+  },
 };

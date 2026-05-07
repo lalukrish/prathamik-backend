@@ -47,11 +47,8 @@ export class UserController {
   };
   softDeleteUser = async (req: Request<{ id: string }>, res: Response) => {
     try {
-      console.log("first?>>>");
-
       const { id } = req.params;
       const { isActive } = req.body;
-      console.log("first", isActive);
       if (!id) {
         res.status(400).json({ error: "User ID is required" });
         return;
@@ -62,6 +59,20 @@ export class UserController {
     } catch (err: any) {
       res.status(500).json({
         error: err.message || "Failed to update user",
+      });
+    }
+  };
+  getAllUser = async (req: Request, res: Response) => {
+    try {
+      const users = await userService.getAllUsers();
+
+      res.json({
+        success: true,
+        data: users,
+      });
+    } catch (err: any) {
+      res.status(500).json({
+        error: err.message || "Failed to fetch all users",
       });
     }
   };
