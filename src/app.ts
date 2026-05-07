@@ -1,4 +1,8 @@
+<<<<<<< HEAD
 import cookieParser from "cookie-parser";
+=======
+import "dotenv/config";
+>>>>>>> 9c5a64070ae11a5aa41105734b24d020831c29b9
 import express from "express";
 import routes from "./routes";
 import { logger } from "./utils/logger";

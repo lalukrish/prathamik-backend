@@ -1,12 +1,13 @@
 import { prisma } from "../../config/db";
 
 export class JobRepository {
-    async create(data: any) {
-        return prisma.job.create({
-            data,
-        });
-    }
+  async create(data: any) {
+    return prisma.job.create({
+      data,
+    });
+  }
 
+<<<<<<< HEAD
     async findAll(orgId: string, skip: number, limit: number) {
         return prisma.job.findMany({
             where: { orgId },
@@ -26,17 +27,40 @@ export class JobRepository {
             where: { id, orgId },
         });
     }
+=======
+  async findAll(orgId: string) {
+    return prisma.job.findMany({
+      where: { orgId },
+      orderBy: { createdAt: "desc" },
+    });
+  }
 
-    async update(id: string, data: any) {
-        return prisma.job.update({
-            where: { id },
-            data,
-        });
-    }
+  async findById(id: string) {
+    return prisma.job.findUnique({
+      where: { id },
+    });
+  }
+>>>>>>> 9c5a64070ae11a5aa41105734b24d020831c29b9
 
+  async update(id: string, data: any) {
+    return prisma.job.update({
+      where: { id },
+      data,
+    });
+  }
+
+<<<<<<< HEAD
     async delete(id: string, orgId: string) {
         return prisma.job.delete({
             where: { id, orgId },
         });
     }
 }
+=======
+  async delete(id: string) {
+    return prisma.job.delete({
+      where: { id },
+    });
+  }
+}
+>>>>>>> 9c5a64070ae11a5aa41105734b24d020831c29b9
