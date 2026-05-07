@@ -1,14 +1,27 @@
+import DOMPurify from "isomorphic-dompurify";
 import { JobRepository } from "./job.repository";
-import { prisma } from "../../config/db";
 import { EmbeddingService } from "../ai/embedding.service";
 import { VectorService } from "../ai/vector.service";
+import { extractTextFromHTML } from "../../utils/html";
+import { CreateJobDTO, UpdateJobDTO } from "./job.types";
 
 const jobRepo = new JobRepository();
 
 export class JobService {
-  async createJob(data: any, userId: string, orgId: string) {
+  async createJob(data: CreateJobDTO, userId: string, orgId: string) {
+    const cleanHtml = DOMPurify.sanitize(data.jdHtml);
+
+    const description = extractTextFromHTML(cleanHtml);
+
     const job = await jobRepo.create({
-      ...data,
+      title: data.title,
+      jdHtml: cleanHtml,
+      description,
+      requiredSkills: data.requiredSkills,
+      niceToHave: data.niceToHave,
+      experienceMin: data.experienceMin,
+      experienceMax: data.experienceMax,
+
       createdBy: userId,
       updatedBy: userId,
       orgId,
@@ -16,13 +29,15 @@ export class JobService {
 
     try {
       const text = `
-      ${data.title}
-      ${data.description}
-      ${data.requiredSkills?.join(", ") || ""}
-      ${data.niceToHave?.join(", ") || ""}
-    `;
+        ${data.title}
+        ${description}
+        ${data.requiredSkills.join(", ")}
+        ${data.niceToHave.join(", ")}
+      `;
+
       const embeddingService = new EmbeddingService();
       const embedding = await embeddingService.generate(text);
+
       const vectorService = new VectorService();
       await vectorService.updateJobEmbedding(job.id, embedding);
     } catch (error) {
@@ -30,6 +45,44 @@ export class JobService {
     }
 
     return job;
+  }
+
+  async updateJob(id: string, data: UpdateJobDTO, userId: string) {
+    let description: string | undefined;
+    let cleanHtml: string | undefined;
+
+    if (data.jdHtml) {
+      cleanHtml = DOMPurify.sanitize(data.jdHtml);
+      description = extractTextFromHTML(cleanHtml);
+    }
+
+    const updated = await jobRepo.update(id, {
+      ...data,
+      ...(cleanHtml && { jdHtml: cleanHtml }),
+      ...(description && { description }),
+      updatedBy: userId,
+    });
+
+    if (description) {
+      try {
+        const text = `
+          ${updated.title}
+          ${description}
+          ${updated.requiredSkills.join(", ")}
+          ${updated.niceToHave.join(", ")}
+        `;
+
+        const embeddingService = new EmbeddingService();
+        const embedding = await embeddingService.generate(text);
+
+        const vectorService = new VectorService();
+        await vectorService.updateJobEmbedding(id, embedding);
+      } catch (error) {
+        console.error("Embedding update failed:", error);
+      }
+    }
+
+    return updated;
   }
 
   async getJobs(orgId: string, page: number, limit: number) {
@@ -53,13 +106,6 @@ export class JobService {
 
   async getJob(id: string, orgId: string) {
     return jobRepo.findById(id, orgId);
-  }
-
-  async updateJob(id: string, data: any, userId: string) {
-    return jobRepo.update(id, {
-      ...data,
-      updatedBy: userId,
-    });
   }
 
   async deleteJob(id: string, orgId: string) {
