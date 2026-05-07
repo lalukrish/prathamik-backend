@@ -5,7 +5,6 @@ import { normalizeIP } from "../../utils/ip";
 export const authController = {
     async login(req: Request, res: Response) {
         try {
-            console.log("shbdjhsfdsj", req.body)
             const userAgent = req.headers["user-agent"] || "";
 
             let device = "Unknown Device";
@@ -47,7 +46,6 @@ export const authController = {
                 data: result,
             });
         } catch (error: any) {
-            console.log("error")
             res.status(401).json({
                 success: false,
                 message: error.message,
