@@ -1,8 +1,5 @@
 import { z } from "zod";
 
-/**
- * Create Job Schema
- */
 export const createJobSchema = z.object({
     body: z.object({
         title: z
@@ -44,9 +41,6 @@ export const createJobSchema = z.object({
     }),
 });
 
-/**
- * Update Job Schema
- */
 export const updateJobSchema = z.object({
     body: z.object({
         title: z
