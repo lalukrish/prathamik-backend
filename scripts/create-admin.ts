@@ -1,10 +1,22 @@
 import { PrismaClient } from "@prisma/client";
-import bcrypt from "bcryptjs";
+import bcrypt from "bcrypt";
 
 const prisma = new PrismaClient();
 
 async function main() {
     console.log("🚀 Creating Super Admin...");
+
+    // Check existing admin
+    const existingAdmin = await prisma.user.findUnique({
+        where: {
+            email: "admin@irishexpert.com",
+        },
+    });
+
+    if (existingAdmin) {
+        console.log("⚠️ Super Admin already exists");
+        return;
+    }
 
     // Create organization
     const organization = await prisma.organization.create({

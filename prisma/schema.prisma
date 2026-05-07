@@ -60,7 +60,7 @@ model User {
 
   orgId        String
   organization Organization @relation(fields: [orgId], references: [id])
-
+  isActive Boolean @default(true)
   sessions Session[]
   createdJobs Job[] @relation("JobCreatedBy")
   updatedJobs Job[] @relation("JobUpdatedBy")
