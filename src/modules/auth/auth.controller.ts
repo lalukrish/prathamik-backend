@@ -1,10 +1,11 @@
 import { Request, Response } from "express";
 import { authService } from "./auth.service";
+import { normalizeIP } from "../../utils/ip";
 
 export const authController = {
     async login(req: Request, res: Response) {
         try {
-            console.log("shbdjhsfdsj",req.body)
+            console.log("shbdjhsfdsj", req.body)
             const userAgent = req.headers["user-agent"] || "";
 
             let device = "Unknown Device";
@@ -35,10 +36,8 @@ export const authController = {
                 device = "Nintendo";
             }
 
-            console.log(req.body)
-
             const result = await authService.login(req.body, {
-                ip: req.ip,
+                ip: normalizeIP(req.ip),
                 userAgent,
                 device,
             });
@@ -71,7 +70,7 @@ export const authController = {
         }
     },
 
-    async register(req: Request, res: Response) {        
+    async register(req: Request, res: Response) {
         const results = await authService.register(req.body);
         if (!results) {
             return res.status(400).json({ success: false, message: "Registration failed" });

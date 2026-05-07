@@ -103,6 +103,8 @@ model Job {
   title       String
   description String
 
+  jdHtml      String?
+
   requiredSkills String[]
   niceToHave     String[]
   experienceMin  Int?

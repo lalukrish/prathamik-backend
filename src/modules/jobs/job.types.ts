@@ -1,21 +1,11 @@
-export interface CreateJobDTO {
-    title: string;
-    description: string;
+import { z } from "zod";
+import {
+    createJobSchema,
+    updateJobSchema,
+} from "./job.validator";
 
-    requiredSkills: string[];
-    niceToHave: string[];
+export type CreateJobDTO =
+    z.infer<typeof createJobSchema>["body"];
 
-    experienceMin?: number;
-    experienceMax?: number;
-}
-
-export interface UpdateJobDTO {
-    title?: string;
-    description?: string;
-
-    requiredSkills?: string[];
-    niceToHave?: string[];
-
-    experienceMin?: number;
-    experienceMax?: number;
-}
+export type UpdateJobDTO =
+    z.infer<typeof updateJobSchema>["body"];
