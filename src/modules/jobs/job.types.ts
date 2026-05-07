@@ -1,19 +1,11 @@
 import { z } from "zod";
+import {
+    createJobSchema,
+    updateJobSchema,
+} from "./job.validator";
 
-export const createJobSchema = z.object({
-    title: z.string().min(2),
+export type CreateJobDTO =
+    z.infer<typeof createJobSchema>["body"];
 
-    jdHtml: z.string().min(10),
-
-    requiredSkills: z.array(z.string()).default([]),
-    niceToHave: z.array(z.string()).default([]),
-
-    experienceMin: z.number().optional(),
-    experienceMax: z.number().optional(),
-});
-
-export type CreateJobDTO = z.infer<typeof createJobSchema>;
-
-export const updateJobSchema = createJobSchema.partial();
-
-export type UpdateJobDTO = z.infer<typeof updateJobSchema>;
+export type UpdateJobDTO =
+    z.infer<typeof updateJobSchema>["body"];
