@@ -11,8 +11,9 @@ export const userService = {
     }
     return user;
   },
+
   createUser: async (data: UserData) => {
-    const existing = await userRepository.findByUserId(data.email);
+    const existing = await userRepository.findByEmail(data.email);
 
     if (existing) {
       throw new Error("User already exists");

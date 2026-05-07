@@ -1,16 +1,11 @@
 import { Role, Organization, Session } from "@prisma/client";
 
-export interface UserData {
-  name: string;
-  email: string;
-  password: string[];
-  role: Role;
-  orgId: string;
-  organization: Organization;
-  sessions: Session;
-}
+import { z } from "zod";
+import { createUserSchema } from "./user.validator";
 
-export interface UpdateJobDTO {
+export type CreateUserInput = z.infer<typeof createUserSchema>;
+
+export interface UpdateUser {
   title?: string;
   description?: string;
 

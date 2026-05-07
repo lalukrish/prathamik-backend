@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import { userService } from "./user.service";
 import { UserData } from "./user.types";
+import { logger } from "../../config/logger";
 
 export class UserController {
   getSingleUserById = async (req: Request<{ id: string }>, res: Response) => {
@@ -22,9 +23,14 @@ export class UserController {
   createUser = async (req: Request, res: Response) => {
     try {
       const user = await userService.createUser(req.body);
-
+      logger.info({
+        data: req.body,
+        message: "user created successfully",
+      });
       res.status(201).json(user);
     } catch (err: any) {
+      logger.error({ error: err, message: "Failed to create user" });
+
       res.status(400).json({ error: err.message });
     }
   };
@@ -36,10 +42,15 @@ export class UserController {
         res.status(400).json({ error: "User ID is required" });
         return;
       }
+      logger.info({
+        data: req.body,
+        message: "user updated successfully",
+      });
       const user = await userService.updateUser(id, req.body);
 
       res.json({ success: true, data: user });
     } catch (err: any) {
+      logger.error({ error: err, message: "Failed to update user" });
       res.status(500).json({
         error: err.message || "Failed to update user",
       });
@@ -54,9 +65,14 @@ export class UserController {
         return;
       }
       const user = await userService.deleteSoft(id, isActive);
-
+      logger.info({
+        data: req.body,
+        message: "user soft delete successfull",
+      });
       res.json({ success: true, data: user });
     } catch (err: any) {
+      logger.error({ error: err, message: "Failed to delete user" });
+
       res.status(500).json({
         error: err.message || "Failed to update user",
       });
