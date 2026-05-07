@@ -16,8 +16,9 @@ export const userRepository = {
   updateUserInActive(id: string, isActive: boolean) {
     return prisma.user.update({
       where: { id },
+
       data: {
-        isActive: false,
+        isActive,
       },
     });
   },
