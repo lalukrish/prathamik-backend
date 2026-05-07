@@ -7,40 +7,25 @@ export class JobRepository {
     });
   }
 
-<<<<<<< HEAD
-    async findAll(orgId: string, skip: number, limit: number) {
-        return prisma.job.findMany({
-            where: { orgId },
-            orderBy: { createdAt: "desc" },
-            skip,
-            take: limit,
-        });
-    }
-
-    async count(orgId: string) {
-        return prisma.job.count({
-            where: { orgId },
-        });
-    }
-    async findById(id: string, orgId: string) {
-        return prisma.job.findUnique({
-            where: { id, orgId },
-        });
-    }
-=======
-  async findAll(orgId: string) {
+  async findAll(orgId: string, skip: number, limit: number) {
     return prisma.job.findMany({
       where: { orgId },
       orderBy: { createdAt: "desc" },
+      skip,
+      take: limit,
     });
   }
 
-  async findById(id: string) {
-    return prisma.job.findUnique({
-      where: { id },
+  async count(orgId: string) {
+    return prisma.job.count({
+      where: { orgId },
     });
   }
->>>>>>> 9c5a64070ae11a5aa41105734b24d020831c29b9
+  async findById(id: string, orgId: string) {
+    return prisma.job.findUnique({
+      where: { id, orgId },
+    });
+  }
 
   async update(id: string, data: any) {
     return prisma.job.update({
@@ -49,18 +34,9 @@ export class JobRepository {
     });
   }
 
-<<<<<<< HEAD
-    async delete(id: string, orgId: string) {
-        return prisma.job.delete({
-            where: { id, orgId },
-        });
-    }
-}
-=======
-  async delete(id: string) {
+  async delete(id: string, orgId: string) {
     return prisma.job.delete({
-      where: { id },
+      where: { id, orgId },
     });
   }
 }
->>>>>>> 9c5a64070ae11a5aa41105734b24d020831c29b9
