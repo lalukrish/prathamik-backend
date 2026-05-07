@@ -1,11 +1,11 @@
 import { prisma } from "../../config/db";
 
 export const authRepository = {
-    findByEmail: async (email: string) => {
-        return prisma.user.findUnique({
-            where: { email },
-        });
-    },
+    findByEmail: async (email: string) =>
+        prisma.user.findUnique({ where: { email } }),
+
+    findById: async (id: string) =>
+        prisma.user.findUnique({ where: { id } }),
 
     createSession: async (data: {
         userId: string;
@@ -14,27 +14,34 @@ export const authRepository = {
         userAgent?: string;
         device?: string;
         expiresAt: Date;
-    }) => {
-        return prisma.session.create({
-            data,
-        });
-    },
+    }) =>
+        prisma.session.create({ data }),
 
-    deactivateSession: async (tokenHash: string) => {
-        return prisma.session.updateMany({
+    updateSessionToken: async (sessionId: string, tokenHash: string,) =>
+        prisma.session.update({
+            where: { id: sessionId },
+            data: { tokenHash },
+        }),
+
+    findActiveSession: async (tokenHash: string) =>
+        prisma.session.findFirst({
+            where: { tokenHash, isActive: true, expiresAt: { gt: new Date() } },
+        }),
+
+    findSessionById: async (sessionId: string) =>
+        prisma.session.findFirst({
+            where: { id: sessionId, isActive: true, expiresAt: { gt: new Date() } },
+        }),
+
+    deactivateSession: async (tokenHash: string) =>
+        prisma.session.updateMany({
             where: { tokenHash },
             data: { isActive: false },
-        });
-    },
+        }),
 
-    findActiveSession: async (tokenHash: string) => {
-        return prisma.session.findUnique({
-            where: {
-                tokenHash,
-                isActive: true,
-                expiresAt: { gt: new Date() },
-            },
-        });
-    },
-
+    deactivateAllUserSessions: async (userId: string) =>
+        prisma.session.updateMany({
+            where: { userId },
+            data: { isActive: false },
+        }),
 };
