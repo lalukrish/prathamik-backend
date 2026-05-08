@@ -40,9 +40,7 @@ export const createUserSchema = z.object({
             message: "Password must contain at least 1 special character",
           });
         }
-      })
-      .optional(),
-
+      }),
     role: z.enum(["super_admin", "hr_manager", "recruiter"], {
       required_error: "Role is required",
     }),

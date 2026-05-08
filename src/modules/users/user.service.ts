@@ -1,5 +1,5 @@
 import { userRepository } from "./user.repository";
-import { UserData } from "./user.types";
+import { CreateUserInput, UpdateUserInput } from "./user.types";
 import bcrypt from "bcrypt";
 
 export const userService = {
@@ -12,7 +12,7 @@ export const userService = {
     return user;
   },
 
-  createUser: async (data: UserData) => {
+  createUser: async (data: CreateUserInput) => {
     const existing = await userRepository.findByEmail(data.email);
 
     if (existing) {
@@ -28,7 +28,7 @@ export const userService = {
 
     return user;
   },
-  updateUser: async (id: string, data: UserData) => {
+  updateUser: async (id: string, data: UpdateUserInput) => {
     const existing = await userRepository.findByUserId(id);
 
     if (!existing) {
