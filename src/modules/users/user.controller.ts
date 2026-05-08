@@ -1,6 +1,5 @@
 import { Request, Response } from "express";
 import { userService } from "./user.service";
-import { UserData } from "./user.types";
 import { logger } from "../../config/logger";
 
 export class UserController {
