@@ -1,54 +1,39 @@
-import {
-    Request,
-    Response,
-} from "express";
+import { Request, Response } from "express";
 
-import { PublicService }
-    from "./public.service";
+import { PublicService } from "./public.service";
 
-import { ApplyJobDTO }
-    from "./public.types";
+import { ApplyJobDTO } from "./public.types";
 
-const publicService =
-    new PublicService();
+const publicService = new PublicService();
 
 export class PublicController {
-    async applyJob(
-        req: Request<
-            { jobId: string },
-            {},
-            ApplyJobDTO
-        >,
+  async applyJob(
+    req: Request<{ jobId: string }, {}, ApplyJobDTO>,
 
-        res: Response
-    ) {
-        try {
-            const result =
-                await publicService.applyJob(
-                    req.params.jobId,
+    res: Response,
+  ) {
+    try {
+      const result = await publicService.applyJob(
+        req.params.jobId,
 
-                    req.body,
+        req.body,
 
-                    req.file
-                );
+        req.file,
+      );
 
-            return res.status(201).json({
-                success: true,
+      return res.status(201).json({
+        success: true,
 
-                message:
-                    "Application submitted successfully",
+        message: "Application submitted successfully",
 
-                data: result,
-            });
+        data: result,
+      });
+    } catch (error: any) {
+      return res.status(500).json({
+        success: false,
 
-        } catch (error: any) {
-            return res.status(500).json({
-                success: false,
-
-                message:
-                    error.message ||
-                    "Failed to apply job",
-            });
-        }
+        message: error.message || "Failed to apply job",
+      });
     }
+  }
 }

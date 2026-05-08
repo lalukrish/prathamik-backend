@@ -1,30 +1,28 @@
 import { supabase } from "../../config/supabase";
 
 export const uploadResumeToStorage = async (
-    file: Express.Multer.File,
-    candidateId: string
+  file: Express.Multer.File,
+  candidateId: string,
 ) => {
-    const fileExt =
-        file.originalname.split(".").pop();
+  const fileExt = file.originalname.split(".").pop();
 
-    const fileName = `
+  const fileName = `
 ${Date.now()}.${fileExt}
 `;
 
-    const filePath = `
+  const filePath = `
 ${candidateId}/${fileName}
 `;
 
-    const { data, error } = await supabase
-        .storage
-        .from("i-bucket")
-        .upload(filePath, file.buffer, {
-            contentType: file.mimetype,
-        });
+  const { data, error } = await supabase.storage
+    .from("i-bucket")
+    .upload(filePath, file.buffer, {
+      contentType: file.mimetype,
+    });
 
-    if (error) {
-        throw error;
-    }
+  if (error) {
+    throw error;
+  }
 
-    return data.path;
+  return data.path;
 };

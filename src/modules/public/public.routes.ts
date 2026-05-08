@@ -10,17 +10,16 @@ import { upload } from "../../middlewares/upload.middleware";
 
 const router = Router();
 
-const controller =
-    new PublicController();
+const controller = new PublicController();
 
 router.post(
-    "/apply/:jobId",
+  "/apply/:jobId",
 
-    upload.single("resume"),
+  upload.single("resume"),
 
-    validate(applyJobSchema),
+  validate(applyJobSchema),
 
-    controller.applyJob
+  controller.applyJob,
 );
 
 export default router;
