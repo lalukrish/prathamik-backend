@@ -8,8 +8,8 @@ const jobService = new JobService();
 export class JobController {
   async create(req: Request<{}, {}, CreateJobDTO>, res: Response) {
     try {
-      const userId = "538e2c22-5cb7-4cb6-aab4-fb6d63fbade0";
-      const orgId = "ef690f98-993f-4173-8aee-28dcf82050da";
+      const userId = req.user?.id ?? "538e2c22-5cb7-4cb6-aab4-fb6d63fbade0";
+      const orgId = req.user?.orgId ?? "ef690f98-993f-4173-8aee-28dcf82050da";
 
       const job = await jobService.createJob(req.body, userId, orgId);
       logger.info({
@@ -27,7 +27,7 @@ export class JobController {
 
   async update(req: Request<{ id: string }, {}, UpdateJobDTO>, res: Response) {
     try {
-      const userId = "538e2c22-5cb7-4cb6-aab4-fb6d63fbade0";
+      const userId = req.user?.id ?? "538e2c22-5cb7-4cb6-aab4-fb6d63fbade0";
 
       const job = await jobService.updateJob(req.params.id, req.body, userId);
       logger.info({
@@ -44,7 +44,7 @@ export class JobController {
 
   async getAll(req: Request, res: Response) {
     try {
-      const orgId = "ef690f98-993f-4173-8aee-28dcf82050da";
+      const orgId = req.user?.orgId ?? "ef690f98-993f-4173-8aee-28dcf82050da";
 
       const page = parseInt(req.query.page as string) || 1;
       const limit = parseInt(req.query.limit as string) || 10;
@@ -59,7 +59,7 @@ export class JobController {
 
   async getOne(req: Request<{ id: string }>, res: Response) {
     try {
-      const orgId = "ef690f98-993f-4173-8aee-28dcf82050da";
+      const orgId = req.user?.orgId ?? "ef690f98-993f-4173-8aee-28dcf82050da";
       const job = await jobService.getJob(req.params.id, orgId);
       res.json({ success: true, data: job });
     } catch (error) {
@@ -70,7 +70,7 @@ export class JobController {
 
   async delete(req: Request<{ id: string }>, res: Response) {
     try {
-      const orgId = "ef690f98-993f-4173-8aee-28dcf82050da";
+      const orgId = req.user?.orgId ?? "ef690f98-993f-4173-8aee-28dcf82050da";
       const job = await jobService.deleteJob(req.params.id, orgId);
       logger.info({
         data: job,
