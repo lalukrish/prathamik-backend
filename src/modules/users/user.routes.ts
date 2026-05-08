@@ -6,17 +6,9 @@ import { createUserSchema, updateUserSchema } from "./user.validator";
 
 const router = Router();
 
-router.get("/get-single-user/:id", userController.getSingleUserById);
-router.post(
-  "/create-user",
-  validate(createUserSchema),
-  userController.createUser,
-);
-router.put(
-  "/update-user/:id",
-  validate(updateUserSchema),
-  userController.updateUser,
-);
+router.get("/:id", userController.getSingleUserById);
+router.post("/signup", validate(createUserSchema), userController.createUser);
+router.put("/:id", validate(updateUserSchema), userController.updateUser);
 router.put("/delete-user/:id", userController.softDeleteUser);
-router.get("/get-all-user", userController.getAllUser);
+router.get("/", userController.getAllUser);
 export default router;

@@ -1,45 +1,38 @@
 import rateLimit from "express-rate-limit";
 import { Request, Response } from "express";
 
-/**
- * General API Limiter
- */
 export const apiLimiter = rateLimit({
-    windowMs: 15 * 60 * 1000,
+  windowMs: 15 * 60 * 1000,
 
-    max: 100,
+  max: 100,
 
-    standardHeaders: true,
+  standardHeaders: true,
 
-    legacyHeaders: false,
+  legacyHeaders: false,
 
-    handler: (req: Request, res: Response) => {
-        res.status(429).json({
-            success: false,
-            message: "Too many requests. Please try again later.",
-        });
-    },
+  handler: (req: Request, res: Response) => {
+    res.status(429).json({
+      success: false,
+      message: "Too many requests. Please try again later.",
+    });
+  },
 });
 
-/**
- * Auth Limiter
- * Prevent brute force login attacks
- */
 export const authLimiter = rateLimit({
-    windowMs: 15 * 60 * 1000,
+  windowMs: 15 * 60 * 1000,
 
-    max: 5,
+  max: 5,
 
-    standardHeaders: true,
+  standardHeaders: true,
 
-    legacyHeaders: false,
+  legacyHeaders: false,
 
-    handler: (req: Request, res: Response) => {
-        res.status(429).json({
-            success: false,
-            message: "Too many login attempts. Please try again later.",
-        });
-    },
+  handler: (req: Request, res: Response) => {
+    res.status(429).json({
+      success: false,
+      message: "Too many login attempts. Please try again later.",
+    });
+  },
 });
 
 /**
@@ -47,38 +40,38 @@ export const authLimiter = rateLimit({
  * Prevent AI abuse / cost explosion
  */
 export const uploadLimiter = rateLimit({
-    windowMs: 10 * 60 * 1000,
+  windowMs: 10 * 60 * 1000,
 
-    max: 20,
+  max: 20,
 
-    standardHeaders: true,
+  standardHeaders: true,
 
-    legacyHeaders: false,
+  legacyHeaders: false,
 
-    handler: (req: Request, res: Response) => {
-        res.status(429).json({
-            success: false,
-            message: "Too many uploads. Please try again later.",
-        });
-    },
+  handler: (req: Request, res: Response) => {
+    res.status(429).json({
+      success: false,
+      message: "Too many uploads. Please try again later.",
+    });
+  },
 });
 
 /**
  * AI Processing Limiter
  */
 export const aiLimiter = rateLimit({
-    windowMs: 60 * 1000,
+  windowMs: 60 * 1000,
 
-    max: 10,
+  max: 10,
 
-    standardHeaders: true,
+  standardHeaders: true,
 
-    legacyHeaders: false,
+  legacyHeaders: false,
 
-    handler: (req: Request, res: Response) => {
-        res.status(429).json({
-            success: false,
-            message: "AI request limit exceeded.",
-        });
-    },
+  handler: (req: Request, res: Response) => {
+    res.status(429).json({
+      success: false,
+      message: "AI request limit exceeded.",
+    });
+  },
 });

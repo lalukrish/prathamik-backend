@@ -48,8 +48,30 @@ export const userService = {
     const user = await userRepository.updateUserInActive(id, isActive);
     return user;
   },
-  getAllUsers: async () => {
-    const users = await userRepository.findAllUser();
-    return users;
+
+  getAllUsers: async (page: number, limit: number, isActive?: boolean) => {
+    const skip = (page - 1) * limit;
+
+    const [users, filteredTotal, total] = await Promise.all([
+      userRepository.findAllUser(skip, limit, isActive),
+
+      userRepository.count(isActive),
+
+      userRepository.count(),
+    ]);
+
+    return {
+      data: users,
+
+      meta: {
+        filteredTotal,
+        total,
+
+        page,
+        limit,
+
+        totalPages: Math.ceil(filteredTotal / limit),
+      },
+    };
   },
 };

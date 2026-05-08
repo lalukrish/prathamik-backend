@@ -27,11 +27,18 @@ export const userRepository = {
       },
     });
   },
-  findAllUser: async () => {
+  findAllUser: async (skip: number, limit: number, isActive?: boolean) => {
     return prisma.user.findMany({
-      where: {
-        isActive: true,
-      },
+      where: isActive !== undefined ? { isActive } : {},
+
+      skip,
+      take: limit,
+    });
+  },
+
+  count: async (isActive?: boolean) => {
+    return prisma.user.count({
+      where: isActive !== undefined ? { isActive } : {},
     });
   },
 };
