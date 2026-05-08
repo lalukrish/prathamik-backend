@@ -34,9 +34,8 @@ export const authRepository = {
         }),
 
     deactivateSession: async (tokenHash: string) =>
-        prisma.session.updateMany({
+        prisma.session.deleteMany({
             where: { tokenHash },
-            data: { isActive: false },
         }),
 
     deactivateAllUserSessions: async (userId: string) =>

@@ -91,7 +91,6 @@ export const authService = {
     },
 
     async register(userDetails:UserData) {
-        // Registration logic can be implemented here            
             const newUser = await userService.createUser(userDetails);
             return newUser;
     },
