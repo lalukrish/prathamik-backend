@@ -13,14 +13,13 @@ export const userService = {
   },
 
   createUser: async (data: CreateUserInput) => {
-    const existing = await userRepository.findByEmail(data.email);
+    const existing = await userRepository.findByEmail(data.body.email);
 
     if (existing) {
       throw new Error("User already exists");
     }
 
-    const hashedPassword = await bcrypt.hash(data.password, 10);
-
+    const hashedPassword = await bcrypt.hash(data.body.password, 10);
     const user = await userRepository.createUser({
       ...data,
       password: hashedPassword,
