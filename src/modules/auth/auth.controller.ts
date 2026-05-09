@@ -5,6 +5,7 @@ import { normalizeIP } from "../../utils/ip";
 export const authController = {
     async login(req: Request, res: Response) {
         try {
+            console.log(req.body, "login data")
             const userAgent = req.headers["user-agent"] || "";
 
             let device = "Unknown Device";
@@ -40,15 +41,27 @@ export const authController = {
                 userAgent,
                 device,
             });
-
+            console.log(result,"Login Result")
             res.json({
                 success: true,
                 data: result,
             });
         } catch (error: any) {
+
+            let message = "Something went wrong";
+
+            if (error.message === "EMAIL_NOT_FOUND") {
+                message = "Email not found";
+            }
+
+            if (error.message === "WRONG_PASSWORD") {
+                message = "Wrong password";
+            }
+
             res.status(401).json({
                 success: false,
-                message: error.message,
+                message,
+                code: error.message,
             });
         }
     },
