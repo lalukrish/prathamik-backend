@@ -66,6 +66,8 @@ model User {
   createdJobs Job[] @relation("JobCreatedBy")
   updatedJobs Job[] @relation("JobUpdatedBy")
 
+  candidates Candidate[]
+
   createdAt DateTime @default(now()) @db.Timestamptz(6)
   updatedAt DateTime @updatedAt @db.Timestamptz(6)
 }
@@ -179,6 +181,10 @@ model Candidate {
   orgId String
 
   organization Organization @relation(fields: [orgId], references: [id])
+
+  createdBy String?
+
+  creator User? @relation(fields: [createdBy], references: [id])
 
   //////////////////////////////////////////////////////
   // RELATIONS
