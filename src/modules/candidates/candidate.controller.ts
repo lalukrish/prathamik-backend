@@ -44,6 +44,53 @@ export class CandidateController {
       });
     }
   };
+  candidateApply = async (
+    req: Request<{ jobId: string }, {}>,
+
+    res: Response,
+  ) => {
+    try {
+      const result = await candidateService.candidateApplyJob(
+        req.params.jobId,
+        req.params.userId,
+        req.body,
+
+        req.file,
+      );
+
+      return res.status(201).json({
+        success: true,
+        message: "Application submitted successfully",
+        data: result,
+      });
+    } catch (error: any) {
+      return res.status(500).json({
+        success: false,
+
+        message: error.message || "Failed to apply job",
+      });
+    }
+  };
+  updateCandidateProfile = async (req: Request, res: Response) => {
+    try {
+      const result = await candidateService.candidateUpdateProfile(
+        req.params.userId,
+        req.body,
+        req.file,
+      );
+
+      return res.status(200).json({
+        success: true,
+        message: "Candidate profile updated successfully",
+        data: result,
+      });
+    } catch (error: any) {
+      return res.status(500).json({
+        success: false,
+        message: error.message || "Failed to update candidate profile",
+      });
+    }
+  };
 }
 
 export const candidateController = new CandidateController();
