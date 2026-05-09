@@ -41,7 +41,6 @@ export const verifyRefreshToken = (token: string) => {
 export const authService = {
     async login(data: LoginInput, meta: { ip?: string; userAgent?: string; device?: string }): Promise<AuthResponse> {
         const user = await authRepository.findByEmail(data.email);
-        console.log(user)
         if (!user || !user.isActive) throw new Error("Invalid credentials");
 
         const isMatch = await bcrypt.compare(data.password, user.password);
@@ -92,7 +91,6 @@ export const authService = {
     },
 
     async register(userDetails:UserData) {
-        // Registration logic can be implemented here            
             const newUser = await userService.createUser(userDetails);
             return newUser;
     },
