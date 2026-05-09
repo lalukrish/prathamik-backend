@@ -134,75 +134,181 @@ model Job {
 //////////////////////////////////////////////////////
 
 model Candidate {
-  id    String  @id @default(uuid())
-  name  String?
-  email String?
+  id String @id @default(uuid())
+
+  //////////////////////////////////////////////////////
+  // BASIC INFO
+  //////////////////////////////////////////////////////
+
+  name  String
+  email String
   phone String?
 
-  orgId        String
+  //////////////////////////////////////////////////////
+  // PROFESSIONAL INFO
+  //////////////////////////////////////////////////////
+
+  currentRole String?
+
+  totalExperience Float?
+
+  skills String[]
+
+  //////////////////////////////////////////////////////
+  // HIRING INFO
+  //////////////////////////////////////////////////////
+
+  expectedSalary Float?
+
+  currentCTC Float?
+
+  noticePeriod Int?
+
+  isOnNoticePeriod Boolean @default(false)
+
+  //////////////////////////////////////////////////////
+  // LINKS
+  //////////////////////////////////////////////////////
+
+  linkedinUrl String?
+
+  //////////////////////////////////////////////////////
+  // ORGANIZATION
+  //////////////////////////////////////////////////////
+
+  orgId String
+
   organization Organization @relation(fields: [orgId], references: [id])
 
-  resumes      Resume[]
+  //////////////////////////////////////////////////////
+  // RELATIONS
+  //////////////////////////////////////////////////////
+
+  resumes Resume[]
+
   applications Application[]
 
+  //////////////////////////////////////////////////////
+  // TIMESTAMPS
+  //////////////////////////////////////////////////////
+
   createdAt DateTime @default(now())
+
+  updatedAt DateTime @updatedAt
+
+  //////////////////////////////////////////////////////
+  // INDEXES
+  //////////////////////////////////////////////////////
+
+  @@index([email])
+
+  @@index([phone])
+
+  @@index([orgId])
 }
 
 //////////////////////////////////////////////////////
-// RESUMES (IMPORTANT 🔥)
+// RESUMES
 //////////////////////////////////////////////////////
 
 model Resume {
-  id          String    @id @default(uuid())
-  candidateId String
-  candidate   Candidate @relation(fields: [candidateId], references: [id])
+  id String @id @default(uuid())
 
-  fileUrl  String
+  candidateId String
+
+  candidate Candidate @relation(fields: [candidateId], references: [id])
+
+  resumeUrl String
+
   fileName String?
+
   fileSize Int?
 
+  mimeType String?
+
+  //////////////////////////////////////////////////////
+  // RELATIONS
+  //////////////////////////////////////////////////////
+
   applications Application[]
+
+  //////////////////////////////////////////////////////
+  // TIMESTAMPS
+  //////////////////////////////////////////////////////
 
   createdAt DateTime @default(now())
 }
 
 //////////////////////////////////////////////////////
-// APPLICATIONS (CORE 🔥)
+// APPLICATIONS
 //////////////////////////////////////////////////////
 
 model Application {
   id String @id @default(uuid())
 
-  jobId String
-  job   Job    @relation(fields: [jobId], references: [id])
+  //////////////////////////////////////////////////////
+  // RELATIONS
+  //////////////////////////////////////////////////////
 
   candidateId String
-  candidate   Candidate @relation(fields: [candidateId], references: [id])
+
+  candidate Candidate @relation(fields: [candidateId], references: [id])
+
+  jobId String
+
+  job Job @relation(fields: [jobId], references: [id])
 
   resumeId String?
-  resume   Resume? @relation(fields: [resumeId], references: [id])
 
-  source Source
+  resume Resume? @relation(fields: [resumeId], references: [id])
 
-  status     ApplicationStatus @default(APPLIED)
-  processing ProcessingStatus  @default(QUEUED)
+  //////////////////////////////////////////////////////
+  // STATUS
+  //////////////////////////////////////////////////////
+
+  status ApplicationStatus @default(APPLIED)
+
+  //////////////////////////////////////////////////////
+  // AI RESULTS
+  //////////////////////////////////////////////////////
 
   overallScore Int?
-  aiSummary    String?
-  parsedData   Json?
+
+  aiSummary String?
 
   matchedSkills String[]
+
   missingSkills String[]
 
-  embedding Unsupported("vector")
+  //////////////////////////////////////////////////////
+  // RELATIONS
+  //////////////////////////////////////////////////////
 
-  logs      ProcessingLog[]
+  logs ProcessingLog[]
+
   interview Interview?
-  scores    CandidateScore?
+
+  scores CandidateScore?
+
+  //////////////////////////////////////////////////////
+  // TIMESTAMPS
+  //////////////////////////////////////////////////////
 
   createdAt DateTime @default(now())
 
-  @@unique([jobId, candidateId])
+  updatedAt DateTime @updatedAt
+
+  //////////////////////////////////////////////////////
+  // INDEXES
+  //////////////////////////////////////////////////////
+
+  @@unique([candidateId, jobId])
+
+  @@index([candidateId])
+
+  @@index([jobId])
+
+  @@index([status])
 }
 
 //////////////////////////////////////////////////////
@@ -210,15 +316,21 @@ model Application {
 //////////////////////////////////////////////////////
 
 model ProcessingLog {
-  id            String      @id @default(uuid())
-  applicationId String
-  application   Application @relation(fields: [applicationId], references: [id])
+  id String @id @default(uuid())
 
-  step    String
-  status  String
+  applicationId String
+
+  application Application @relation(fields: [applicationId], references: [id])
+
+  step String
+
+  status String
+
   message String?
 
   createdAt DateTime @default(now())
+
+  @@index([applicationId])
 }
 
 //////////////////////////////////////////////////////
