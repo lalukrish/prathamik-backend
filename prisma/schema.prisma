@@ -44,7 +44,7 @@ model Organization {
   jobs       Job[]
   candidates Candidate[] // important
 
-  createdAt DateTime @default(now())
+  createdAt DateTime @default(now()) @db.Timestamptz(6)
 }
 
 //////////////////////////////////////////////////////
@@ -66,8 +66,8 @@ model User {
   createdJobs Job[] @relation("JobCreatedBy")
   updatedJobs Job[] @relation("JobUpdatedBy")
 
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  createdAt DateTime @default(now()) @db.Timestamptz(6)
+  updatedAt DateTime @updatedAt @db.Timestamptz(6)
 }
 
 //////////////////////////////////////////////////////
@@ -79,18 +79,18 @@ model Session {
   userId String
   user   User   @relation(fields: [userId], references: [id])
 
-  tokenHash String @unique   // referesh token jwt convert to hash
+  tokenHash String? @unique   // referesh token jwt convert to hash
 
   device    String?
   ipAddress String?
   userAgent String?
 
   isActive  Boolean   @default(true)
-  expiresAt DateTime  // ❗ make required
+  expiresAt DateTime @db.Timestamptz(6)  // ❗ make required
 
-  lastActiveAt DateTime? @updatedAt
+  lastActiveAt DateTime? @updatedAt @db.Timestamptz(6)
 
-  createdAt DateTime @default(now())
+  createdAt DateTime @default(now()) @db.Timestamptz(6)
 
   @@index([userId])
   @@index([tokenHash])
@@ -125,8 +125,8 @@ model Job {
 
   applications Application[]
 
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  createdAt DateTime @default(now()) @db.Timestamptz(6)
+  updatedAt DateTime @updatedAt @db.Timestamptz(6)
 }
 
 //////////////////////////////////////////////////////
@@ -192,9 +192,9 @@ model Candidate {
   // TIMESTAMPS
   //////////////////////////////////////////////////////
 
-  createdAt DateTime @default(now())
+  createdAt DateTime @default(now()) @db.Timestamptz(6)
 
-  updatedAt DateTime @updatedAt
+  updatedAt DateTime @updatedAt @db.Timestamptz(6)
 
   //////////////////////////////////////////////////////
   // INDEXES
@@ -236,7 +236,7 @@ model Resume {
   // TIMESTAMPS
   //////////////////////////////////////////////////////
 
-  createdAt DateTime @default(now())
+  createdAt DateTime @default(now()) @db.Timestamptz(6)
 }
 
 //////////////////////////////////////////////////////
@@ -294,9 +294,9 @@ model Application {
   // TIMESTAMPS
   //////////////////////////////////////////////////////
 
-  createdAt DateTime @default(now())
+  createdAt DateTime @default(now()) @db.Timestamptz(6)
 
-  updatedAt DateTime @updatedAt
+  updatedAt DateTime @updatedAt @db.Timestamptz(6)
 
   //////////////////////////////////////////////////////
   // INDEXES
@@ -328,7 +328,7 @@ model ProcessingLog {
 
   message String?
 
-  createdAt DateTime @default(now())
+  createdAt DateTime @default(now()) @db.Timestamptz(6)
 
   @@index([applicationId])
 }
@@ -353,7 +353,7 @@ model Interview {
 
   questions InterviewQuestion[]
 
-  createdAt DateTime @default(now())
+  createdAt DateTime @default(now()) @db.Timestamptz(6)
 }
 
 //////////////////////////////////////////////////////
@@ -371,7 +371,7 @@ model InterviewQuestion {
   options      Json?
   correct      Json?
 
-  createdAt DateTime @default(now())
+  createdAt DateTime @default(now()) @db.Timestamptz(6)
 }
 
 //////////////////////////////////////////////////////
@@ -389,5 +389,5 @@ model CandidateScore {
   cheatScore     Int?
   overallScore   Int?
 
-  createdAt DateTime @default(now())
+  createdAt DateTime @default(now()) @db.Timestamptz(6)
 }

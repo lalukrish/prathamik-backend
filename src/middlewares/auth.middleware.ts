@@ -28,7 +28,7 @@ export const authMiddleware = async (req: Request, res: Response, next: NextFunc
         return res.status(401).json({ success: false, message: "Session ended, please login again" });
     }
 
-    await prisma.session.update({
+    let a = await prisma.session.update({
         where: {
             userId: result.decoded!.id,
             id: session.id,
@@ -38,6 +38,8 @@ export const authMiddleware = async (req: Request, res: Response, next: NextFunc
             lastActiveAt: new Date(),
         },
     });
+
+    console.log(a)
 
     req.user = result.decoded!;
     next();
