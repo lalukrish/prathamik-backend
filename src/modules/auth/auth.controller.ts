@@ -5,7 +5,6 @@ import { normalizeIP } from "../../utils/ip";
 export const authController = {
     async login(req: Request, res: Response) {
         try {
-            console.log(req.body, "login data")
             const userAgent = req.headers["user-agent"] || "";
 
             let device = "Unknown Device";
