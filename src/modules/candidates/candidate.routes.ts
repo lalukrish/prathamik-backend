@@ -30,4 +30,10 @@ router.put(
 
   candidateController.updateCandidateProfile,
 );
+
+router.put(
+  "/delete-candidate/:id",
+
+  candidateController.softDeleteCandidate,
+);
 export default router;

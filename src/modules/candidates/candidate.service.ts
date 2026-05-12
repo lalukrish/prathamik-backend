@@ -11,13 +11,13 @@ export const candidateService = {
     return user;
   },
 
-  getAllCandidate: async (page: number, limit: number) => {
+  getAllCandidate: async (page: number, limit: number, isBlocked: string) => {
     const skip = (page - 1) * limit;
 
     const [users, total] = await Promise.all([
-      candidateRepository.findAllCandidate(skip, limit),
+      candidateRepository.findAllCandidate(skip, limit, isBlocked),
 
-      candidateRepository.count(),
+      candidateRepository.count(isBlocked),
     ]);
 
     return {

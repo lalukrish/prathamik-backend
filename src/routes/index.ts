@@ -14,10 +14,10 @@ const controller = new JobController();
 router.use("/jobs", authMiddleware, jobRoutes);
 router.use("/auth", authRoutes);
 router.use("/user", authMiddleware, userRoutes);
+router.use("/candidate", authMiddleware, candidateRoutes);
 
 // public routes
 router.get("/jobs/:id", controller.getOne.bind(controller));
 router.use("/public", publicRoutes);
-router.use("/candidate", candidateRoutes);
 
 export default router;

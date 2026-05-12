@@ -30,8 +30,16 @@ export class CandidateController {
     try {
       const page = parseInt(req.query.page as string) || 1;
       const limit = parseInt(req.query.limit as string) || 10;
+      const isBlocked =
+        req.query.isActive !== undefined
+          ? req.query.isBlocked === "true"
+          : undefined;
 
-      const users = await candidateService.getAllCandidate(page, limit);
+      const users = await candidateService.getAllCandidate(
+        page,
+        limit,
+        isBlocked,
+      );
 
       res.json({
         success: true,
