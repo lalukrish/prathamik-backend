@@ -41,11 +41,17 @@ export const verifyRefreshToken = (token: string) => {
 export const authService = {
     async login(data: LoginInput, meta: { ip?: string; userAgent?: string; device?: string }): Promise<AuthResponse> {
         const user = await authRepository.findByEmail(data.email);
-        if (!user || !user.isActive) throw new Error("Invalid credentials");
+        if (!user) {
+            throw new Error("EMAIL_NOT_FOUND");
+        }
 
+        if (!user.isActive) {
+            throw new Error("ACCOUNT_DISABLED");
+        }
         const isMatch = await bcrypt.compare(data.password, user.password);
-        if (!isMatch) throw new Error("Invalid credentials");
-
+        if (!isMatch) {
+            throw new Error("WRONG_PASSWORD");
+        }
         const session = await authRepository.createSession({
             userId: user.id,
             tokenHash: "",
@@ -78,7 +84,12 @@ export const authService = {
         if (!session) throw new Error("SESSION_REVOKED");
 
         const user = await authRepository.findById(result.decoded!.id);
-        if (!user || !user.isActive) throw new Error("USER_NOT_FOUND");
+        if (!user) {
+            throw new Error("USER_NOT_FOUND");
+        }
+        if (!user.isActive) {
+            throw new Error("ACCOUNT_DISABLED");
+        }
 
         return {
             accessToken: generateAccessToken({
@@ -90,9 +101,9 @@ export const authService = {
         };
     },
 
-    async register(userDetails:UserData) {
-            const newUser = await userService.createUser(userDetails);
-            return newUser;
+    async register(userDetails: UserData) {
+        const newUser = await userService.createUser(userDetails);
+        return newUser;
     },
 
     async logout(rawRefreshToken: string): Promise<void> {

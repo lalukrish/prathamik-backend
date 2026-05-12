@@ -45,7 +45,7 @@ export class CandidateController {
     }
   };
   candidateApply = async (
-    req: Request<{ jobId: string }, {}>,
+    req: Request<{ jobId: string; userId: string }, {}>,
 
     res: Response,
   ) => {
@@ -71,14 +71,32 @@ export class CandidateController {
       });
     }
   };
-  updateCandidateProfile = async (req: Request, res: Response) => {
+  updateCandidateProfile = async (
+    req: Request<
+      {
+        userId: { id: any };
+        id: string;
+      },
+      any
+    >,
+    res: Response,
+  ) => {
     try {
+      const { id } = req.params.userId;
+
+      if (!id) {
+        res.status(400).json({ error: "User ID is required" });
+        return;
+      }
       const result = await candidateService.candidateUpdateProfile(
-        req.params.userId,
+        id,
         req.body,
         req.file,
       );
-
+      logger.info({
+        data: req.body,
+        message: "user updated successfully",
+      });
       return res.status(200).json({
         success: true,
         message: "Candidate profile updated successfully",
@@ -88,6 +106,34 @@ export class CandidateController {
       return res.status(500).json({
         success: false,
         message: error.message || "Failed to update candidate profile",
+      });
+    }
+  };
+  softDeleteCandidate = async (req: Request<{ id: string }>, res: Response) => {
+    try {
+      const { id } = req.params;
+      const { isBlocked } = req.body;
+      if (!id) {
+        res.status(400).json({ error: "User ID is required" });
+        return;
+      }
+      const candidate = await candidateService.candidateSoftDelete(
+        id,
+        isBlocked,
+      );
+      logger.info({
+        data: req.body,
+        message: "candidate soft delete successfull",
+      });
+      res.json({
+        success: true,
+        message: "candidate deleted successfully",
+        data: candidate,
+      });
+    } catch (err: any) {
+      logger.error({ error: err, message: "Failed to delete user" });
+      res.status(500).json({
+        error: err.message || "Failed to update user",
       });
     }
   };

@@ -40,28 +40,51 @@ export const authController = {
         userAgent,
         device,
       });
+      console.log(result, "Login Result");
+      const isProduction = process.env.NODE_ENV === "production";
 
-      res.json({
-        success: true,
-        data: result,
-      });
+      res
+        .cookie("refreshToken", result.refreshToken, {
+          httpOnly: true,
+          secure: isProduction,
+          sameSite: "strict",
+          maxAge: 7 * 24 * 60 * 60 * 1000,
+        })
+        .json({
+          success: true,
+          data: {
+            user: result.user,
+            accessToken: result.accessToken,
+          },
+        });
     } catch (error: any) {
+      let message = "Something went wrong";
+
+      if (error.message === "EMAIL_NOT_FOUND") {
+        message = "Email not found";
+      }
+
+      if (error.message === "WRONG_PASSWORD") {
+        message = "Wrong password";
+      }
+
       res.status(401).json({
         success: false,
-        message: error.message,
+        message,
+        code: error.message,
       });
     }
   },
 
   async refresh(req: Request, res: Response) {
-    const { refreshToken } = req.body;
-    if (!refreshToken) {
-      return res
-        .status(401)
-        .json({ success: false, message: "No refresh token provided" });
-    }
-
     try {
+      const refreshToken = req.cookies.refreshToken;
+      if (!refreshToken) {
+        return res
+          .status(401)
+          .json({ success: false, message: "No refresh token" });
+      }
+
       const result = await authService.refresh(refreshToken);
       return res.json({ success: true, data: result });
     } catch (error: any) {

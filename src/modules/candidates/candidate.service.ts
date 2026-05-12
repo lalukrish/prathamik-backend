@@ -1,5 +1,4 @@
 import { candidateRepository } from "./candidate.repository";
-import { CreateUserInput, UpdateUserInput } from "./user.types";
 import { uploadResumeToStorage } from "../public/resume.service";
 
 export const candidateService = {
@@ -139,5 +138,16 @@ export const candidateService = {
       candidate: updatedCandidate,
       resume,
     };
+  },
+  candidateSoftDelete: async (id: string, isBlocked: boolean) => {
+    const existing = await candidateRepository.findByUserId(id);
+    if (!existing) {
+      throw new Error("User doesn't exists");
+    }
+    const candidate = await candidateRepository.updateCandidateInActive(
+      id,
+      isBlocked,
+    );
+    return candidate;
   },
 };

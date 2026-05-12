@@ -17,10 +17,10 @@ export const candidateRepository = {
     });
   },
 
-  getCandidateHistory: async (userId: string) => {
+  getCandidateHistory: async (id: string) => {
     return prisma.candidate.findFirst({
       where: {
-        userId,
+        id,
       },
 
       include: {
@@ -35,10 +35,11 @@ export const candidateRepository = {
     });
   },
   findByEmail: async (email: string) => {
-    return prisma.candidate.findUnique({
+    return prisma.candidate.findFirst({
       where: { email },
     });
   },
+
   findAllCandidate: async (skip: number, limit: number) => {
     return prisma.candidate.findMany({
       skip,
@@ -49,6 +50,7 @@ export const candidateRepository = {
   count: async (isActive?: boolean) => {
     return prisma.candidate.count({});
   },
+
   findJobById: async (jobId: string) => {
     return prisma.job.findUnique({
       where: {
@@ -140,7 +142,8 @@ export const candidateRepository = {
       },
     });
   },
-  updateCandidate: async (candidateId: string, payload: ApplyJobDTO) => {
+
+  updateCandidate: async (candidateId: string, payload: any) => {
     return prisma.candidate.update({
       where: {
         id: candidateId,
@@ -198,6 +201,15 @@ export const candidateRepository = {
         fileSize: file.size,
 
         mimeType: file.mimetype,
+      },
+    });
+  },
+
+  updateCandidateInActive(id: string, isBlocked: boolean) {
+    return prisma.candidate.update({
+      where: { id },
+      data: {
+        isBlocked,
       },
     });
   },
