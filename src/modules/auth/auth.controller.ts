@@ -110,6 +110,11 @@ export const authController = {
     if (refreshToken) {
       await authService.logout(refreshToken);
     }
-    return res.json({ success: true, message: "Logged out" });
+    res.clearCookie("refreshToken", {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "strict",
+    });
+    res.json({ success: true });
   },
 };
