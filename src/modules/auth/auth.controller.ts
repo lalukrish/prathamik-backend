@@ -112,4 +112,27 @@ export const authController = {
     }
     return res.json({ success: true, message: "Logged out" });
   },
+  async changePassword(req: Request, res: Response) {
+    try {
+      const { oldPassword, newPassword } = req.body;
+      const userId = req.params.id;
+
+      const result = await authService.changePassword(
+        userId,
+        oldPassword,
+        newPassword,
+      );
+
+      return res.status(200).json({
+        success: true,
+        message: "Password changed successfully",
+        data: result,
+      });
+    } catch (err: any) {
+      return res.status(500).json({
+        success: false,
+        message: err.message || "Failed to change password",
+      });
+    }
+  },
 };

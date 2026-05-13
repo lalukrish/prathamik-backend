@@ -147,4 +147,27 @@ export const authService = {
   async logout(rawRefreshToken: string): Promise<void> {
     await authRepository.deactivateSession(hashToken(rawRefreshToken));
   },
+  async changePassword(
+    userId: string,
+    oldPassword: string,
+    newPassword: string,
+  ) {
+    const user = await authRepository.findById(userId);
+
+    if (!user) {
+      throw new Error("User not found");
+    }
+
+    const isMatch = await bcrypt.compare(oldPassword, user.password);
+
+    if (!isMatch) {
+      throw new Error("Old password is incorrect");
+    }
+
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+
+    await authRepository.updatePassword(userId, hashedPassword);
+
+    return true;
+  },
 };

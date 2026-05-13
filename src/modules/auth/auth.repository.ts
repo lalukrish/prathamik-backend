@@ -1,46 +1,55 @@
 import { prisma } from "../../config/db";
 
 export const authRepository = {
-    findByEmail: async (email: string) =>
-        prisma.user.findUnique({ where: { email } }),
+  findByEmail: async (email: string) =>
+    prisma.user.findUnique({ where: { email } }),
 
-    findById: async (id: string) =>
-        prisma.user.findUnique({ where: { id } }),
+  findById: async (id: string) => prisma.user.findUnique({ where: { id } }),
 
-    createSession: async (data: {
-        userId: string;
-        tokenHash: string;
-        ipAddress?: string;
-        userAgent?: string;
-        device?: string;
-        expiresAt: Date;
-    }) =>
-        prisma.session.create({ data }),
+  createSession: async (data: {
+    userId: string;
+    tokenHash: string;
+    ipAddress?: string;
+    userAgent?: string;
+    device?: string;
+    expiresAt: Date;
+  }) => prisma.session.create({ data }),
 
-    updateSessionToken: async (sessionId: string, tokenHash: string,) =>
-        prisma.session.update({
-            where: { id: sessionId },
-            data: { tokenHash },
-        }),
+  updateSessionToken: async (sessionId: string, tokenHash: string) =>
+    prisma.session.update({
+      where: { id: sessionId },
+      data: { tokenHash },
+    }),
 
-    findActiveSession: async (tokenHash: string) =>
-        prisma.session.findFirst({
-            where: { tokenHash, isActive: true, expiresAt: { gt: new Date() } },
-        }),
+  findActiveSession: async (tokenHash: string) =>
+    prisma.session.findFirst({
+      where: { tokenHash, isActive: true, expiresAt: { gt: new Date() } },
+    }),
 
-    findSessionById: async (sessionId: string) =>
-        prisma.session.findFirst({
-            where: { id: sessionId, isActive: true, expiresAt: { gt: new Date() } },
-        }),
+  findSessionById: async (sessionId: string) =>
+    prisma.session.findFirst({
+      where: { id: sessionId, isActive: true, expiresAt: { gt: new Date() } },
+    }),
 
-    deactivateSession: async (tokenHash: string) =>
-        prisma.session.deleteMany({
-            where: { tokenHash },
-        }),
+  deactivateSession: async (tokenHash: string) =>
+    prisma.session.deleteMany({
+      where: { tokenHash },
+    }),
 
-    deactivateAllUserSessions: async (userId: string) =>
-        prisma.session.updateMany({
-            where: { userId },
-            data: { isActive: false },
-        }),
+  deactivateAllUserSessions: async (userId: string) =>
+    prisma.session.updateMany({
+      where: { userId },
+      data: { isActive: false },
+    }),
+  updatePassword: async (userId: string, password: string) => {
+    return prisma.user.update({
+      where: {
+        id: userId,
+      },
+
+      data: {
+        password,
+      },
+    });
+  },
 };
