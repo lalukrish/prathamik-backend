@@ -85,25 +85,12 @@ export const authService = {
       expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
     });
 
-    // const session = await authRepository.createSession({
-    //   userId: user.id,
-    //   tokenHash: "",
-    //   ipAddress: meta.ip,
-    //   userAgent: meta.userAgent,
-    //   device: meta.device ?? "Unknown Device",
-    //   expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
-    // });
-
     const accessToken = generateAccessToken({
       id: user.id,
       role: user.role,
       orgId: user.orgId,
       sessionId: session.id,
     });
-    // const refreshToken = generateRefreshToken({
-    //   id: user.id,
-    //   sessionId: session.id,
-    // });
 
     await authRepository.updateSessionToken(
       session.id,
@@ -129,7 +116,6 @@ export const authService = {
       throw new Error(result.expired ? "SESSION_EXPIRED" : "INVALID_TOKEN");
     }
 
-    // hash the incoming token and find matching active session
     const session = await authRepository.findActiveSession(
       hashToken(rawRefreshToken),
     );
