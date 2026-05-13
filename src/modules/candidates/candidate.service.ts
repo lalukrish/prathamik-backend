@@ -1,5 +1,6 @@
 import { candidateRepository } from "./candidate.repository";
 import { uploadResumeToStorage } from "../public/resume.service";
+import { ApplyJobDTO } from "../public/public.types";
 
 export const candidateService = {
   getCandidateById: async (id: string) => {
@@ -11,18 +12,16 @@ export const candidateService = {
     return user;
   },
 
-  getAllCandidate: async (page: number, limit: number, isBlocked: string) => {
+  getAllCandidate: async (page: number, limit: number, isBlocked?: boolean) => {
     const skip = (page - 1) * limit;
 
     const [users, total] = await Promise.all([
       candidateRepository.findAllCandidate(skip, limit, isBlocked),
-
       candidateRepository.count(isBlocked),
     ]);
 
     return {
       data: users,
-
       meta: {
         total,
         page,
@@ -31,6 +30,7 @@ export const candidateService = {
       },
     };
   },
+
   candidateApplyJob: async (
     jobId: string,
     userId: string,
@@ -94,6 +94,7 @@ export const candidateService = {
       application,
     };
   },
+
   candidateUpdateProfile: async (
     userId: string,
     payload: ApplyJobDTO,
