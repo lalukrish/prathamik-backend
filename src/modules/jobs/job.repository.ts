@@ -7,34 +7,32 @@ export class JobRepository {
     });
   }
 
-  async findAll(orgId: string, skip: number, limit: number) {
+  async findAll(orgId: string, skip: number, limit: number, search: string) {
     return prisma.job.findMany({
-      where: { orgId },
+      where: {
+        orgId,
+        ...(search && {
+          title: { contains: search, mode: "insensitive" },
+        }),
+      },
       orderBy: { createdAt: "desc" },
-
       include: {
-        creator: {
-          select: {
-            id: true,
-            name: true,
-          },
-        },
-
-        updater: {
-          select: {
-            id: true,
-            name: true,
-          },
-        },
+        creator: { select: { id: true, name: true } },
+        updater: { select: { id: true, name: true } },
       },
       skip,
       take: limit,
     });
   }
 
-  async count(orgId: string) {
+  async count(orgId: string, search: string) {
     return prisma.job.count({
-      where: { orgId },
+      where: {
+        orgId,
+        ...(search && {
+          title: { contains: search, mode: "insensitive" },
+        }),
+      },
     });
   }
   async findById(id: string, orgId: string) {

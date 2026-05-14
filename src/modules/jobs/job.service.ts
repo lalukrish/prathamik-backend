@@ -85,12 +85,12 @@ export class JobService {
     return updated;
   }
 
-  async getJobs(orgId: string, page: number, limit: number) {
+  async getJobs(orgId: string, page: number, limit: number, search: string) {
     const skip = (page - 1) * limit;
 
     const [jobs, total] = await Promise.all([
-      jobRepo.findAll(orgId, skip, limit),
-      jobRepo.count(orgId),
+      jobRepo.findAll(orgId, skip, limit, search),
+      jobRepo.count(orgId, search),
     ]);
 
     return {

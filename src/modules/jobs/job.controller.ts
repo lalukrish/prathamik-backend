@@ -48,8 +48,9 @@ export class JobController {
 
       const page = parseInt(req.query.page as string) || 1;
       const limit = parseInt(req.query.limit as string) || 10;
+      const search = (req.query.search as string) || "";
 
-      const result = await jobService.getJobs(orgId, page, limit);
+      const result = await jobService.getJobs(orgId, page, limit, search);
       res.json({ success: true, ...result });
     } catch (error) {
       logger.error({ error: error, message: "Failed to get jobs" });
