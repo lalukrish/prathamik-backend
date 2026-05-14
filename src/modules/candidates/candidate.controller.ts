@@ -79,17 +79,11 @@ export class CandidateController {
     }
   };
   updateCandidateProfile = async (
-    req: Request<
-      {
-        userId: { id: any };
-        id: string;
-      },
-      any
-    >,
+    req: Request<{ id: string }>,
     res: Response,
   ) => {
     try {
-      const { id } = req.params.userId;
+      const { id } = req.params;
 
       if (!id) {
         res.status(400).json({ error: "User ID is required" });

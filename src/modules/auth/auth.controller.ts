@@ -117,10 +117,14 @@ export const authController = {
     });
     res.json({ success: true });
   },
+
   async changePassword(req: Request, res: Response) {
     try {
       const { oldPassword, newPassword } = req.body;
-      const userId = req.params.id;
+
+      const userId = Array.isArray(req.params.id)
+        ? req.params.id[0]
+        : req.params.id;
 
       const result = await authService.changePassword(
         userId,
