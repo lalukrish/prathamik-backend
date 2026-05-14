@@ -10,7 +10,7 @@ export const applyJobSchema = z.object({
     email: z
       .string()
       .min(1, "Email is required")
-      .email("Invalid email address"),
+      .email("Invalid email address."),
 
     phone: z.string().optional(),
 
