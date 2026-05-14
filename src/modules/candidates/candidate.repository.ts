@@ -40,7 +40,11 @@ export const candidateRepository = {
     });
   },
 
-  findAllCandidate: async (skip: number, limit: number, isBlocked: boolean) => {
+  findAllCandidate: async (
+    skip: number,
+    limit: number,
+    isBlocked?: boolean,
+  ) => {
     return prisma.candidate.findMany({
       where: isBlocked !== undefined ? { isBlocked } : {},
 
