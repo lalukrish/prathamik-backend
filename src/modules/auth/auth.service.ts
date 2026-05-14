@@ -10,7 +10,7 @@ import {
 } from "./auth.types";
 import { register } from "module";
 import { userService } from "../users/user.service";
-import { UserData } from "../users/user.types";
+import { CreateUserInput } from "../users/user.types";
 
 const ACCESS_SECRET = process.env.ACCESS_SECRET!;
 const REFRESH_SECRET = process.env.REFRESH_SECRET!;
@@ -100,10 +100,11 @@ export const authService = {
     return {
       user: {
         id: user.id,
-        name: user.name,
+        name: user.name ?? "",
         email: user.email,
-        role: user.role,
+        // role: user.role,
         orgId: user.orgId,
+        // isActive: false,
       },
       accessToken,
       refreshToken,
@@ -139,7 +140,7 @@ export const authService = {
     };
   },
 
-  async register(userDetails: UserData) {
+  async register(userDetails: CreateUserInput) {
     const newUser = await userService.createUser(userDetails);
     return newUser;
   },
