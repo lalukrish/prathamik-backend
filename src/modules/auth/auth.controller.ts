@@ -6,9 +6,7 @@ export const authController = {
   async login(req: Request, res: Response) {
     try {
       const userAgent = req.headers["user-agent"] || "";
-
       let device = "Unknown Device";
-
       if (userAgent.includes("Postman")) {
         device = "Postman";
       } else if (userAgent.includes("iPhone")) {
@@ -40,14 +38,15 @@ export const authController = {
         userAgent,
         device,
       });
-      console.log(result, "Login Result");
+
       const isProduction = process.env.NODE_ENV === "production";
 
       res
         .cookie("refreshToken", result.refreshToken, {
           httpOnly: true,
           secure: isProduction,
-          sameSite: "strict",
+          // sameSite: "strict",
+          sameSite: "lax",
           maxAge: 7 * 24 * 60 * 60 * 1000,
         })
         .json({
@@ -79,6 +78,7 @@ export const authController = {
   async refresh(req: Request, res: Response) {
     try {
       const refreshToken = req.cookies.refreshToken;
+
       if (!refreshToken) {
         return res
           .status(401)

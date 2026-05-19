@@ -1,4 +1,5 @@
 import { prisma } from "../../config/db";
+import { Role } from "@prisma/client";
 
 export const userRepository = {
   findByUserId: async (id: string) => {
@@ -32,18 +33,32 @@ export const userRepository = {
       },
     });
   },
-  findAllUser: async (skip: number, limit: number, isActive?: boolean) => {
+  findAllUser: async (
+    skip: number,
+    limit: number,
+    isActive?: boolean,
+    role?: string,
+  ) => {
     return prisma.user.findMany({
-      where: isActive !== undefined ? { isActive } : {},
+      where: {
+        ...(isActive !== undefined && { isActive }),
+
+        ...(role && { role: role as Role }),
+      },
 
       skip,
+
       take: limit,
     });
   },
 
-  count: async (isActive?: boolean) => {
+  count: async (isActive?: boolean, role?: string) => {
     return prisma.user.count({
-      where: isActive !== undefined ? { isActive } : {},
+      where: {
+        ...(isActive !== undefined && { isActive }),
+
+        ...(role && { role: role as Role }),
+      },
     });
   },
 };

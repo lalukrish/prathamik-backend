@@ -13,7 +13,6 @@ export class UserController {
       }
 
       const user = await userService.getUserById(id);
-
       res.status(200).json({
         success: true,
         message: "User fetched successfully",
@@ -25,6 +24,7 @@ export class UserController {
   };
   createUser = async (req: Request, res: Response) => {
     try {
+      console.log("REQ BODY =>", req.body);
       const user = await userService.createUser(req.body);
       logger.info({
         data: req.body,
@@ -97,18 +97,19 @@ export class UserController {
     try {
       const page = parseInt(req.query.page as string) || 1;
       const limit = parseInt(req.query.limit as string) || 10;
+      const role = req.query.role as string;
 
       const isActive =
         req.query.isActive !== undefined
           ? req.query.isActive === "true"
           : undefined;
 
-      const users = await userService.getAllUsers(page, limit, isActive);
+      const users = await userService.getAllUsers(page, limit, isActive, role);
 
       res.json({
         success: true,
         message: "Users fetched successfully",
-        data: users,
+        ...users,
       });
     } catch (err: any) {
       res.status(500).json({

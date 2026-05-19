@@ -27,6 +27,7 @@ export const generateRefreshToken = (payload: RefreshTokenPayload): string =>
 export const verifyAccessToken = (token: string) => {
   try {
     const decoded = jwt.verify(token, ACCESS_SECRET) as AccessTokenPayload;
+
     return { valid: true, expired: false, decoded };
   } catch (err: any) {
     return {
@@ -113,30 +114,38 @@ export const authService = {
 
   async refresh(rawRefreshToken: string): Promise<{ accessToken: string }> {
     const result = verifyRefreshToken(rawRefreshToken);
+
     if (!result.valid) {
       throw new Error(result.expired ? "SESSION_EXPIRED" : "INVALID_TOKEN");
     }
 
-    const session = await authRepository.findActiveSession(
-      hashToken(rawRefreshToken),
-    );
-    if (!session) throw new Error("SESSION_REVOKED");
+    const hashedToken = hashToken(rawRefreshToken);
+
+    const session = await authRepository.findActiveSession(hashedToken);
+
+    if (!session) {
+      throw new Error("SESSION_REVOKED");
+    }
 
     const user = await authRepository.findById(result.decoded!.id);
+
     if (!user) {
       throw new Error("USER_NOT_FOUND");
     }
+
     if (!user.isActive) {
       throw new Error("ACCOUNT_DISABLED");
     }
 
+    const accessToken = generateAccessToken({
+      id: user.id,
+      role: user.role,
+      orgId: user.orgId,
+      sessionId: session.id,
+    });
+
     return {
-      accessToken: generateAccessToken({
-        id: user.id,
-        role: user.role,
-        orgId: user.orgId,
-        sessionId: session.id,
-      }),
+      accessToken,
     };
   },
 

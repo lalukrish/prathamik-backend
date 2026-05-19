@@ -40,3 +40,29 @@ export const validate =
       });
     }
   };
+
+// import { Request, Response, NextFunction } from "express";
+// import { ZodError } from "zod";
+
+// export const validate =
+//   (schema: any) => (req: Request, res: Response, next: NextFunction) => {
+//     try {
+//       console.log("REQ PARAMS =>", req.params);
+//       console.log("REQ QUERY =>", req.query);
+//       console.log("REQ BODY =>", req.body);
+
+//       const validatedData = schema.parse({
+//         body: req.body,
+//         query: req.query,
+//         params: req.params,
+//       });
+
+//       req.body = validatedData.body;
+//       req.query = validatedData.query;
+//       req.params = validatedData.params;
+
+//       next();
+//     } catch (error) {
+//       return error;
+//     }
+//   };

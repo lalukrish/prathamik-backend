@@ -15,7 +15,6 @@ export const authMiddleware = async (
   }
 
   const token = authHeader.split(" ")[1];
-  console.log(token, "token");
   const result = verifyAccessToken(token);
 
   if (!result.valid) {
@@ -26,7 +25,11 @@ export const authMiddleware = async (
         code: "TOKEN_EXPIRED",
       });
     }
-    return res.status(403).json({ success: false, message: "Invalid token" });
+    return res.status(401).json({
+      success: false,
+      message: "Invalid token",
+      code: "INVALID_TOKEN",
+    });
   }
 
   const session = await authRepository.findSessionById(

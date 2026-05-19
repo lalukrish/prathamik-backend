@@ -11,15 +11,15 @@ export const userService = {
     }
     return user;
   },
-
   createUser: async (data: CreateUserInput) => {
-    const existing = await userRepository.findByEmail(data.body.email);
+    const existing = await userRepository.findByEmail(data.email);
 
     if (existing) {
       throw new Error("User already exists");
     }
 
-    const hashedPassword = await bcrypt.hash(data.body.password, 10);
+    const hashedPassword = await bcrypt.hash(data.password, 10);
+
     const user = await userRepository.createUser({
       ...data,
       password: hashedPassword,
@@ -33,6 +33,7 @@ export const userService = {
     if (!existing) {
       throw new Error("User doesn't exists");
     }
+
     const user = await userRepository.updateUser(id, {
       ...data,
     });
@@ -48,13 +49,18 @@ export const userService = {
     return user;
   },
 
-  getAllUsers: async (page: number, limit: number, isActive?: boolean) => {
+  getAllUsers: async (
+    page: number,
+    limit: number,
+    isActive?: boolean,
+    role?: string,
+  ) => {
     const skip = (page - 1) * limit;
 
     const [users, filteredTotal, total] = await Promise.all([
-      userRepository.findAllUser(skip, limit, isActive),
+      userRepository.findAllUser(skip, limit, isActive, role),
 
-      userRepository.count(isActive),
+      userRepository.count(isActive, role),
 
       userRepository.count(),
     ]);

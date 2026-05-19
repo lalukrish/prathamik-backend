@@ -5,7 +5,7 @@ import {
 } from "./candidate.controller";
 import { upload } from "../../middlewares/upload.middleware";
 import { validate } from "../../middlewares/validation.middleware";
-import { applyJobSchema } from "./candidate.type";
+import { applyJobSchema, updateCandidateProfileSchema } from "./candidate.type";
 
 const router = Router();
 const controller = new CandidateController();
@@ -26,7 +26,7 @@ router.put(
 
   upload.single("resume"),
 
-  //   validate(applyJobSchema),
+     validate(updateCandidateProfileSchema),
 
   candidateController.updateCandidateProfile,
 );
