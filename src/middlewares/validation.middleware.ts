@@ -12,8 +12,8 @@ export const validate =
       });
 
       req.body = validatedData.body;
-      req.query = validatedData.query;
-      req.params = validatedData.params;
+      // req.query = validatedData.query;
+      // req.params = validatedData.params;
 
       next();
     } catch (error) {

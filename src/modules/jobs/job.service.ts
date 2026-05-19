@@ -21,6 +21,7 @@ export class JobService {
       niceToHave: data.niceToHave,
       experienceMin: data.experienceMin,
       experienceMax: data.experienceMax,
+      disabled:true,
 
       createdBy: userId,
       updatedBy: userId,

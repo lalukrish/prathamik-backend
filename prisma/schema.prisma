@@ -132,6 +132,8 @@ model Job {
   experienceMin  Int?
   experienceMax  Int?
 
+  disabled Boolean @default(false)
+
   embedding Unsupported("vector")?
 
   orgId        String
