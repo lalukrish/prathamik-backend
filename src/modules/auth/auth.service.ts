@@ -89,7 +89,7 @@ export const authService = {
     const accessToken = generateAccessToken({
       id: user.id,
       role: user.role,
-      orgId: user.orgId,
+      orgId: user?.orgId,
       sessionId: session.id,
     });
 

@@ -10,6 +10,9 @@ export class JobController {
     try {
       const userId = req.user?.id;
       const orgId = req.user?.orgId;
+      if (!orgId) {
+        throw new Error("Organization ID is required");
+      }
 
       const job = await jobService.createJob(req.body, userId, orgId);
       logger.info({
@@ -45,6 +48,9 @@ export class JobController {
   async getAll(req: Request, res: Response) {
     try {
       const orgId = req.user?.orgId;
+      if (!orgId) {
+        throw new Error("Organization ID is required");
+      }
 
       const page = parseInt(req.query.page as string) || 1;
       const limit = parseInt(req.query.limit as string) || 10;
@@ -61,6 +67,10 @@ export class JobController {
   async getOne(req: Request<{ id: string }>, res: Response) {
     try {
       const orgId = req.user?.orgId;
+      if (!orgId) {
+        throw new Error("Organization ID is required");
+      }
+
       const job = await jobService.getJob(req.params.id, orgId);
       res.json({ success: true, data: job });
     } catch (error) {
@@ -72,6 +82,10 @@ export class JobController {
   async delete(req: Request<{ id: string }>, res: Response) {
     try {
       const orgId = req.user?.orgId;
+      if (!orgId) {
+        throw new Error("Organization ID is required");
+      }
+
       const job = await jobService.deleteJob(req.params.id, orgId);
       logger.info({
         data: job,

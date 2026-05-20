@@ -1,3 +1,65 @@
+// import { prisma } from "../../config/db";
+
+// export class JobRepository {
+//   async create(data: any) {
+//     return prisma.job.create({
+//       data,
+//     });
+//   }
+
+//   async findAll(
+//     orgId: string | null,
+//     skip: number,
+//     limit: number,
+//     search: string,
+//   ) {
+//     return prisma.job.findMany({
+//       where: {
+//         orgId,
+//         ...(search && {
+//           title: { contains: search, mode: "insensitive" },
+//         }),
+//       },
+//       orderBy: { createdAt: "desc" },
+//       include: {
+//         creator: { select: { id: true, name: true } },
+//         updater: { select: { id: true, name: true } },
+//       },
+//       skip,
+//       take: limit,
+//     });
+//   }
+
+//   async count(orgId: string | null, search: string) {
+//     return prisma.job.count({
+//       where: {
+//         orgId,
+//         ...(search && {
+//           title: { contains: search, mode: "insensitive" },
+//         }),
+//       },
+//     });
+//   }
+//   async findById(id: string, orgId: string | null) {
+//     return prisma.job.findUnique({
+//       where: { id, orgId },
+//     });
+//   }
+
+//   async update(id: string, data: any) {
+//     return prisma.job.update({
+//       where: { id },
+//       data,
+//     });
+//   }
+
+//   async delete(id: string, orgId: string | null) {
+//     return prisma.job.delete({
+//       where: { id, orgId },
+//     });
+//   }
+// }
+
 import { prisma } from "../../config/db";
 
 export class JobRepository {
@@ -7,50 +69,120 @@ export class JobRepository {
     });
   }
 
-  async findAll(orgId: string, skip: number, limit: number, search: string) {
+  async findAll(
+    orgId: string | null,
+    skip: number,
+    limit: number,
+    search: string,
+  ) {
+    // CHECK ORG ID
+    if (!orgId) {
+      throw new Error("Organization ID missing");
+    }
+
     return prisma.job.findMany({
       where: {
         orgId,
+
         ...(search && {
-          title: { contains: search, mode: "insensitive" },
+          title: {
+            contains: search,
+            mode: "insensitive",
+          },
         }),
       },
-      orderBy: { createdAt: "desc" },
-      include: {
-        creator: { select: { id: true, name: true } },
-        updater: { select: { id: true, name: true } },
+
+      orderBy: {
+        createdAt: "desc",
       },
+
+      include: {
+        creator: {
+          select: {
+            id: true,
+            name: true,
+          },
+        },
+
+        updater: {
+          select: {
+            id: true,
+            name: true,
+          },
+        },
+      },
+
       skip,
       take: limit,
     });
   }
 
-  async count(orgId: string, search: string) {
+  async count(orgId: string | null, search: string) {
+    // CHECK ORG ID
+    if (!orgId) {
+      throw new Error("Organization ID missing");
+    }
+
     return prisma.job.count({
       where: {
         orgId,
+
         ...(search && {
-          title: { contains: search, mode: "insensitive" },
+          title: {
+            contains: search,
+            mode: "insensitive",
+          },
         }),
       },
     });
   }
-  async findById(id: string, orgId: string) {
-    return prisma.job.findUnique({
-      where: { id, orgId },
+
+  async findById(id: string, orgId: string | null) {
+    // CHECK ORG ID
+    if (!orgId) {
+      throw new Error("Organization ID missing");
+    }
+
+    return prisma.job.findFirst({
+      where: {
+        id,
+        orgId,
+      },
     });
   }
 
   async update(id: string, data: any) {
     return prisma.job.update({
-      where: { id },
+      where: {
+        id,
+      },
+
       data,
     });
   }
 
-  async delete(id: string, orgId: string) {
+  async delete(id: string, orgId: string | null) {
+    // CHECK ORG ID
+    if (!orgId) {
+      throw new Error("Organization ID missing");
+    }
+
+    // CHECK JOB EXISTS
+    const job = await prisma.job.findFirst({
+      where: {
+        id,
+        orgId,
+      },
+    });
+
+    if (!job) {
+      throw new Error("Job not found");
+    }
+
     return prisma.job.delete({
-      where: { id, orgId },
+      where: {
+        id,
+      },
     });
   }
 }

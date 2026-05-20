@@ -8,7 +8,7 @@ import { CreateJobDTO, UpdateJobDTO } from "./job.types";
 const jobRepo = new JobRepository();
 
 export class JobService {
-  async createJob(data: CreateJobDTO, userId: string, orgId: string) {
+  async createJob(data: CreateJobDTO, userId: string, orgId: string | null) {
     const cleanHtml = DOMPurify.sanitize(data.jdHtml);
 
     const description = extractTextFromHTML(cleanHtml);
@@ -21,7 +21,7 @@ export class JobService {
       niceToHave: data.niceToHave,
       experienceMin: data.experienceMin,
       experienceMax: data.experienceMax,
-      disabled:true,
+      disabled: true,
 
       createdBy: userId,
       updatedBy: userId,
@@ -109,7 +109,7 @@ export class JobService {
     return jobRepo.findById(id, orgId);
   }
 
-  async deleteJob(id: string, orgId: string) {
+  async deleteJob(id: string, orgId: string | null) {
     return jobRepo.delete(id, orgId);
   }
 }
