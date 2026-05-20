@@ -19,7 +19,7 @@ const hashToken = (token: string): string =>
   crypto.createHash("sha256").update(token).digest("hex");
 
 export const generateAccessToken = (payload: AccessTokenPayload): string =>
-  jwt.sign(payload, ACCESS_SECRET, { expiresIn: "15m" });
+  jwt.sign(payload, ACCESS_SECRET, { expiresIn: "150m" });
 
 export const generateRefreshToken = (payload: RefreshTokenPayload): string =>
   jwt.sign(payload, REFRESH_SECRET, { expiresIn: "7d" });
@@ -89,7 +89,7 @@ export const authService = {
     const accessToken = generateAccessToken({
       id: user.id,
       role: user.role,
-      orgId: user?.orgId,
+      orgId: user.orgId,
       sessionId: session.id,
     });
 
