@@ -42,37 +42,35 @@ export const createUserSchema = z
       message: "Role is required",
     }),
 
-    // optional because super_admin may not belong to org
+    // OPTIONAL FOR SUPER ADMIN
     orgId: z.string().uuid("Invalid organization ID").optional(),
 
-    // optional branch name
-    branch_name: z.string().optional(),
+    // OPTIONAL FOR SUPER ADMIN
+    branchId: z.string().uuid("Invalid branch ID").optional(),
 
     isActive: z.boolean().optional(),
   })
-  .superRefine((data, ctx) => {
-    // recruiter/hr must have organization
-    if (
-      (data.role === "recruiter" || data.role === "hr_manager") &&
-      !data.orgId
-    ) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        path: ["orgId"],
-        message: "Organization is required",
-      });
-    }
 
-    // if branch name sent, orgId must exist
-    if (data.branch_name && !data.orgId) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        path: ["branch_name"],
-        message: "Organization is required for branch name",
-      });
+  .superRefine((data, ctx) => {
+    // recruiter/hr_manager MUST HAVE organization + branch
+    if (data.role === "recruiter" || data.role === "hr_manager") {
+      if (!data.orgId) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          path: ["orgId"],
+          message: "Organization is required",
+        });
+      }
+
+      if (!data.branchId) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          path: ["branchId"],
+          message: "Branch is required",
+        });
+      }
     }
   });
-
 export const updateUserSchema = z.object({
   body: z.object({
     name: z.string().min(2, "Name must be at least 2 characters").optional(),

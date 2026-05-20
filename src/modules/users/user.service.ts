@@ -18,20 +18,14 @@ export const userService = {
       throw new Error("User already exists");
     }
 
-    // recruiter/hr_manager must have orgId
-    if (
-      (data.role === "recruiter" || data.role === "hr_manager") &&
-      !data.orgId
-    ) {
-      throw new Error("Organization is required");
-    }
+    if (data.role === "recruiter" || data.role === "hr_manager") {
+      if (!data.orgId) {
+        throw new Error("Organization is required");
+      }
 
-    // update branch name if provided
-    if (data.branch_name && data.orgId) {
-      await userRepository.updateOrganizationBranch(
-        data.orgId,
-        data.branch_name,
-      );
+      if (!data.branchId) {
+        throw new Error("Branch is required");
+      }
     }
 
     const hashedPassword = await bcrypt.hash(data.password, 10);
@@ -41,7 +35,11 @@ export const userService = {
       email: data.email,
       password: hashedPassword,
       role: data.role,
-      orgId: data.orgId,
+
+      orgId: data.orgId || null,
+
+      branchId: data.branchId || null,
+
       isActive: data.isActive ?? true,
     });
 
