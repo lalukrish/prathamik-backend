@@ -1,12 +1,11 @@
 import { prisma } from "../../config/db";
 
 export const organizationService = {
-  createOrganization: async (data: any, userId: string) => {
+  createOrganization: async (data: any) => {
     const existingOrganization = await prisma.organization.findFirst({
       where: {
         name: data.name,
         branch_name: data.branch_name,
-        createdById: data.createdById,
       },
     });
 
@@ -19,6 +18,20 @@ export const organizationService = {
         name: data.name,
         branch_name: data.branch_name,
         createdById: data.createdById,
+      },
+    });
+  },
+  async getAllOrganizations() {
+    return prisma.organization.findMany({
+      select: {
+        id: true,
+        name: true,
+        branch_name: true,
+        createdAt: true,
+      },
+
+      orderBy: {
+        createdAt: "desc",
       },
     });
   },

@@ -36,19 +36,4 @@ export class PublicController {
       });
     }
   }
-  async getAllOrganizations(req: Request, res: Response) {
-    try {
-      const organizations = await publicService.getAllOrganizations();
-
-      res.status(200).json({
-        success: true,
-        data: organizations,
-      });
-    } catch (error: any) {
-      res.status(500).json({
-        success: false,
-        error: error.message,
-      });
-    }
-  }
 }

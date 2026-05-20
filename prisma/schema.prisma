@@ -8,19 +8,30 @@ datasource db {
 }
 
 model Organization {
-  id            String   @id @default(uuid())
-  name          String
-  branch_name   String
+  id          String   @id @default(uuid())
+  name        String
 
-  createdById   String?
-  createdBy     User? @relation("OrganizationCreatedBy", fields: [createdById], references: [id])
-  users         User[]
-  jobs          Job[]
-  candidates    Candidate[]
+  createdById String?
+  createdBy   User? @relation("OrganizationCreatedBy",fields: [createdById], references: [id] )
 
-  createdAt     DateTime @default(now()) @db.Timestamptz(6)
+  branches    Branch[]
+  users       User[]
+  jobs        Job[]
+  candidates  Candidate[]
+
+  createdAt   DateTime @default(now()) @db.Timestamptz(6)
 }
 
+model Branch {
+  id             String @id @default(uuid())
+
+  name           String
+
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id])
+  users          User[]
+  createdAt      DateTime @default(now()) @db.Timestamptz(6)
+}
 
 model User {
   id           String   @id @default(uuid())
@@ -33,6 +44,9 @@ model User {
   organization Organization? @relation(fields: [orgId], references: [id])
 
   createdOrganizations Organization[] @relation("OrganizationCreatedBy")
+
+  branchId  String?
+  branch    Branch? @relation(fields: [branchId], references: [id])
 
   createdAt    DateTime @default(now()) @db.Timestamptz(6)
   updatedAt    DateTime @updatedAt @db.Timestamptz(6)

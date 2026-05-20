@@ -94,11 +94,8 @@ export class PublicService {
     const application = await prisma.application.create({
       data: {
         candidateId: candidate.id,
-
         jobId,
-
         resumeId,
-
         // source: "applied",
       },
     });
@@ -107,19 +104,5 @@ export class PublicService {
       candidate,
       application,
     };
-  }
-  async getAllOrganizations() {
-    return prisma.organization.findMany({
-      select: {
-        id: true,
-        name: true,
-        branch_name: true,
-        createdAt: true,
-      },
-
-      orderBy: {
-        createdAt: "desc",
-      },
-    });
   }
 }

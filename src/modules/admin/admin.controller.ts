@@ -15,7 +15,6 @@ export class AdminController {
 
       const organization = await organizationService.createOrganization(
         req.body,
-        user.id,
       );
 
       res.status(201).json({
@@ -25,6 +24,21 @@ export class AdminController {
       });
     } catch (error: any) {
       res.status(400).json({
+        success: false,
+        error: error.message,
+      });
+    }
+  }
+  async getAllOrganizations(req: Request, res: Response) {
+    try {
+      const organizations = await organizationService.getAllOrganizations();
+
+      res.status(200).json({
+        success: true,
+        data: organizations,
+      });
+    } catch (error: any) {
+      res.status(500).json({
         success: false,
         error: error.message,
       });
