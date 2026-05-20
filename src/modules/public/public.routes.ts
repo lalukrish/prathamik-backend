@@ -22,4 +22,5 @@ router.post(
   controller.applyJob,
 );
 
+router.get("/organizations", controller.getAllOrganizations);
 export default router;

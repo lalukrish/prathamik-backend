@@ -108,4 +108,18 @@ export class PublicService {
       application,
     };
   }
+  async getAllOrganizations() {
+    return prisma.organization.findMany({
+      select: {
+        id: true,
+        name: true,
+        branch_name: true,
+        createdAt: true,
+      },
+
+      orderBy: {
+        createdAt: "desc",
+      },
+    });
+  }
 }

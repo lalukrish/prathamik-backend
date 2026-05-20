@@ -17,7 +17,31 @@ export const userRepository = {
   },
 
   createUser: async (data: any) => {
-    return prisma.user.create({ data });
+    return prisma.user.create({
+      data,
+
+      include: {
+        organization: {
+          select: {
+            id: true,
+            name: true,
+            branch_name: true,
+          },
+        },
+      },
+    });
+  },
+
+  updateOrganizationBranch: async (orgId: string, branch_name: string) => {
+    return prisma.organization.update({
+      where: {
+        id: orgId,
+      },
+
+      data: {
+        branch_name,
+      },
+    });
   },
   updateUser(id: string, data: any) {
     return prisma.user.update({
@@ -42,13 +66,22 @@ export const userRepository = {
     return prisma.user.findMany({
       where: {
         ...(isActive !== undefined && { isActive }),
-
         ...(role && { role: role as Role }),
       },
 
       skip,
-
       take: limit,
+
+      include: {
+        organization: {
+          select: {
+            id: true,
+            name: true,
+            branch_name: true,
+            createdAt: true,
+          },
+        },
+      },
     });
   },
 

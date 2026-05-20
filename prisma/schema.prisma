@@ -7,9 +7,232 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-//////////////////////////////////////////////////////
-// ENUMS
-//////////////////////////////////////////////////////
+model Organization {
+  id            String   @id @default(uuid())
+  name          String
+  branch_name   String
+
+  createdById   String?
+  createdBy     User? @relation("OrganizationCreatedBy", fields: [createdById], references: [id])
+  users         User[]
+  jobs          Job[]
+  candidates    Candidate[]
+
+  createdAt     DateTime @default(now()) @db.Timestamptz(6)
+}
+
+
+model User {
+  id           String   @id @default(uuid())
+  name         String?
+  email        String   @unique
+  password     String
+  role         Role
+
+  orgId        String?
+  organization Organization? @relation(fields: [orgId], references: [id])
+
+  createdOrganizations Organization[] @relation("OrganizationCreatedBy")
+
+  createdAt    DateTime @default(now()) @db.Timestamptz(6)
+  updatedAt    DateTime @updatedAt @db.Timestamptz(6)
+
+  isActive     Boolean @default(true)
+
+  candidates   Candidate[]
+  createdJobs  Job[] @relation("JobCreatedBy")
+  updatedJobs  Job[] @relation("JobUpdatedBy")
+  sessions     Session[]
+  profile      UserProfile?
+}
+
+model UserProfile {
+  id           String   @id @default(uuid())
+  userId       String   @unique
+  phone        String?
+  bio          String?
+  addressLine1 String?
+  city         String?
+  state        String?
+  country      String?
+  zipCode      String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Session {
+  id           String    @id @default(uuid())
+  userId       String
+  device       String?
+  ipAddress    String?
+  userAgent    String?
+  isActive     Boolean   @default(true)
+  expiresAt    DateTime  @db.Timestamptz(6)
+  createdAt    DateTime  @default(now()) @db.Timestamptz(6)
+  tokenHash    String?   @unique
+  lastActiveAt DateTime? @updatedAt @db.Timestamptz(6)
+  user         User      @relation(fields: [userId], references: [id])
+
+  @@index([userId])
+  @@index([tokenHash])
+}
+
+model Job {
+  id             String                 @id @default(uuid())
+  title          String
+  description    String
+  requiredSkills String[]
+  niceToHave     String[]
+  experienceMin  Int?
+  experienceMax  Int?
+  embedding      Unsupported("vector")?
+  orgId          String
+  createdBy      String
+  createdAt      DateTime               @default(now()) @db.Timestamptz(6)
+  updatedAt      DateTime               @updatedAt @db.Timestamptz(6)
+  updatedBy      String?
+  jdHtml         String?
+  disabled       Boolean                @default(false)
+  applications   Application[]
+  creator        User                   @relation("JobCreatedBy", fields: [createdBy], references: [id])
+  organization   Organization           @relation(fields: [orgId], references: [id])
+  updater        User?                  @relation("JobUpdatedBy", fields: [updatedBy], references: [id])
+}
+
+model Candidate {
+  id               String        @id @default(uuid())
+  /// ///////////////////////////////////////////////////
+  /// ///////////////////////////////////////////////////
+  name             String
+  email            String
+  phone            String?
+  /// ///////////////////////////////////////////////////
+  /// ///////////////////////////////////////////////////
+  orgId            String
+  /// ///////////////////////////////////////////////////
+  /// ///////////////////////////////////////////////////
+  createdAt        DateTime      @default(now()) @db.Timestamptz(6)
+  /// ///////////////////////////////////////////////////
+  /// ///////////////////////////////////////////////////
+  currentRole      String?
+  /// ///////////////////////////////////////////////////
+  /// ///////////////////////////////////////////////////
+  linkedinUrl      String?
+  skills           String[]
+  totalExperience  Float?
+  updatedAt        DateTime      @updatedAt @db.Timestamptz(6)
+  currentCTC       Float?
+  /// ///////////////////////////////////////////////////
+  /// ///////////////////////////////////////////////////
+  expectedSalary   Float?
+  isOnNoticePeriod Boolean       @default(false)
+  noticePeriod     Int?
+  createdBy        String?
+  isBlocked        Boolean       @default(false)
+  applications     Application[]
+  creator          User?         @relation(fields: [createdBy], references: [id])
+  organization     Organization  @relation(fields: [orgId], references: [id])
+  resumes          Resume[]
+
+  @@index([email])
+  @@index([phone])
+  @@index([orgId])
+}
+
+model Resume {
+  id           String        @id @default(uuid())
+  candidateId  String
+  fileName     String?
+  fileSize     Int?
+  /// ///////////////////////////////////////////////////
+  /// ///////////////////////////////////////////////////
+  createdAt    DateTime      @default(now()) @db.Timestamptz(6)
+  mimeType     String?
+  resumeUrl    String
+  applications Application[]
+  candidate    Candidate     @relation(fields: [candidateId], references: [id])
+}
+
+model Application {
+  id            String            @id @default(uuid())
+  jobId         String
+  /// ///////////////////////////////////////////////////
+  /// ///////////////////////////////////////////////////
+  candidateId   String
+  resumeId      String?
+  /// ///////////////////////////////////////////////////
+  /// ///////////////////////////////////////////////////
+  status        ApplicationStatus @default(APPLIED)
+  /// ///////////////////////////////////////////////////
+  /// ///////////////////////////////////////////////////
+  overallScore  Int?
+  aiSummary     String?
+  matchedSkills String[]
+  missingSkills String[]
+  /// ///////////////////////////////////////////////////
+  /// ///////////////////////////////////////////////////
+  createdAt     DateTime          @default(now()) @db.Timestamptz(6)
+  updatedAt     DateTime          @updatedAt @db.Timestamptz(6)
+  candidate     Candidate         @relation(fields: [candidateId], references: [id])
+  job           Job               @relation(fields: [jobId], references: [id])
+  resume        Resume?           @relation(fields: [resumeId], references: [id])
+  scores        CandidateScore?
+  interview     Interview?
+  logs          ProcessingLog[]
+
+  @@unique([candidateId, jobId])
+  @@index([candidateId])
+  @@index([jobId])
+  @@index([status])
+}
+
+model ProcessingLog {
+  id            String      @id @default(uuid())
+  applicationId String
+  step          String
+  status        String
+  message       String?
+  createdAt     DateTime    @default(now()) @db.Timestamptz(6)
+  application   Application @relation(fields: [applicationId], references: [id])
+
+  @@index([applicationId])
+}
+
+model Interview {
+  id            String              @id @default(uuid())
+  applicationId String              @unique
+  status        String
+  cheatScore    Int?
+  overallScore  Int?
+  startedAt     DateTime?
+  completedAt   DateTime?
+  createdAt     DateTime            @default(now()) @db.Timestamptz(6)
+  application   Application         @relation(fields: [applicationId], references: [id])
+  questions     InterviewQuestion[]
+}
+
+model InterviewQuestion {
+  id           String    @id @default(uuid())
+  interviewId  String
+  questionText String
+  type         String
+  options      Json?
+  correct      Json?
+  createdAt    DateTime  @default(now()) @db.Timestamptz(6)
+  interview    Interview @relation(fields: [interviewId], references: [id])
+}
+
+model CandidateScore {
+  id             String      @id @default(uuid())
+  applicationId  String      @unique
+  resumeScore    Int?
+  interviewScore Int?
+  cheatScore     Int?
+  overallScore   Int?
+  createdAt      DateTime    @default(now()) @db.Timestamptz(6)
+  application    Application @relation(fields: [applicationId], references: [id])
+}
 
 enum Role {
   super_admin
@@ -34,388 +257,4 @@ enum ProcessingStatus {
   PROCESSING
   COMPLETED
   FAILED
-}
-
-model Organization {
-  id   String @id @default(uuid())
-  name String
-
-  users      User[]
-  jobs       Job[]
-  candidates Candidate[] // important
-
-  createdAt DateTime @default(now()) @db.Timestamptz(6)
-}
-
-//////////////////////////////////////////////////////
-// USERS
-//////////////////////////////////////////////////////
-
-model User {
-  id       String  @id @default(uuid())
-  name     String?
-  email    String  @unique
-  password String
-  role     Role
-  orgId        String
-  organization Organization @relation(fields: [orgId], references: [id])
-  isActive Boolean @default(true)
-  sessions Session[]
-  createdJobs Job[] @relation("JobCreatedBy")
-  updatedJobs Job[] @relation("JobUpdatedBy")
-  profile UserProfile?
-  candidates Candidate[]
-  createdAt DateTime @default(now()) @db.Timestamptz(6)
-  updatedAt DateTime @updatedAt @db.Timestamptz(6)
-}
-
-model UserProfile {
-  id String @id @default(uuid())
-  userId String @unique
-  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
-  phone       String?
-  bio         String?
-
-  addressLine1 String?
-
-  city    String?
-  state   String?
-  country String?
-  zipCode String?
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-}
-
-//////////////////////////////////////////////////////
-// SESSIONS
-//////////////////////////////////////////////////////
-
-model Session {
-  id     String @id @default(uuid())
-  userId String
-  user   User   @relation(fields: [userId], references: [id])
-
-  tokenHash String? @unique   // referesh token jwt convert to hash
-
-  device    String?
-  ipAddress String?
-  userAgent String?
-
-  isActive  Boolean   @default(true)
-  expiresAt DateTime @db.Timestamptz(6)  // ❗ make required
-
-  lastActiveAt DateTime? @updatedAt @db.Timestamptz(6)
-
-  createdAt DateTime @default(now()) @db.Timestamptz(6)
-
-  @@index([userId])
-  @@index([tokenHash])
-}
-
-
-
-
-//////////////////////////////////////////////////////
-// JOBS
-//////////////////////////////////////////////////////
-
-model Job {
-  id          String @id @default(uuid())
-  title       String
-  description String
-
-  jdHtml      String?
-
-  requiredSkills String[]
-  niceToHave     String[]
-  experienceMin  Int?
-  experienceMax  Int?
-
-  disabled Boolean @default(false)
-
-  embedding Unsupported("vector")?
-
-  orgId        String
-  organization Organization @relation(fields: [orgId], references: [id])
-
-  createdBy String
-  creator   User @relation("JobCreatedBy", fields: [createdBy], references: [id])
-
-  updatedBy String?
-  updater   User? @relation("JobUpdatedBy", fields: [updatedBy], references: [id])
-
-  applications Application[]
-
-  createdAt DateTime @default(now()) @db.Timestamptz(6)
-  updatedAt DateTime @updatedAt @db.Timestamptz(6)
-}
-
-//////////////////////////////////////////////////////
-// CANDIDATES
-//////////////////////////////////////////////////////
-
-model Candidate {
-  id String @id @default(uuid())
-
-  //////////////////////////////////////////////////////
-  // BASIC INFO
-  //////////////////////////////////////////////////////
-
-  name  String
-  email String
-  phone String?
-
-  //////////////////////////////////////////////////////
-  // PROFESSIONAL INFO
-  //////////////////////////////////////////////////////
-
-  currentRole String?
-
-  totalExperience Float?
-
-  skills String[]
-
-  //////////////////////////////////////////////////////
-  // HIRING INFO
-  //////////////////////////////////////////////////////
-
-  expectedSalary Float?
-
-  currentCTC Float?
-
-  noticePeriod Int?
-
-  isOnNoticePeriod Boolean @default(false)
-
-  //////////////////////////////////////////////////////
-  // LINKS
-  //////////////////////////////////////////////////////
-
-  linkedinUrl String?
-
-  //////////////////////////////////////////////////////
-  // ORGANIZATION
-  //////////////////////////////////////////////////////
-
-  orgId String
-
-  organization Organization @relation(fields: [orgId], references: [id])
-
-  createdBy String?
-
-  creator User? @relation(fields: [createdBy], references: [id])
-
-  //////////////////////////////////////////////////////
-  // RELATIONS
-  //////////////////////////////////////////////////////
-
-  resumes Resume[]
-
-  applications Application[]
-
-  isBlocked Boolean @default(false)
-  
-  //////////////////////////////////////////////////////
-  // TIMESTAMPS
-  //////////////////////////////////////////////////////
-
-  createdAt DateTime @default(now()) @db.Timestamptz(6)
-
-  updatedAt DateTime @updatedAt @db.Timestamptz(6)
-
-  //////////////////////////////////////////////////////
-  // INDEXES
-  //////////////////////////////////////////////////////
-
-  @@index([email])
-
-  @@index([phone])
-
-  @@index([orgId])
-}
-
-//////////////////////////////////////////////////////
-// RESUMES
-//////////////////////////////////////////////////////
-
-model Resume {
-  id String @id @default(uuid())
-
-  candidateId String
-
-  candidate Candidate @relation(fields: [candidateId], references: [id])
-
-  resumeUrl String
-
-  fileName String?
-
-  fileSize Int?
-
-  mimeType String?
-
-  //////////////////////////////////////////////////////
-  // RELATIONS
-  //////////////////////////////////////////////////////
-
-  applications Application[]
-
-  //////////////////////////////////////////////////////
-  // TIMESTAMPS
-  //////////////////////////////////////////////////////
-
-  createdAt DateTime @default(now()) @db.Timestamptz(6)
-}
-
-//////////////////////////////////////////////////////
-// APPLICATIONS
-//////////////////////////////////////////////////////
-
-model Application {
-  id String @id @default(uuid())
-
-  //////////////////////////////////////////////////////
-  // RELATIONS
-  //////////////////////////////////////////////////////
-
-  candidateId String
-
-  candidate Candidate @relation(fields: [candidateId], references: [id])
-
-  jobId String
-
-  job Job @relation(fields: [jobId], references: [id])
-
-  resumeId String?
-
-  resume Resume? @relation(fields: [resumeId], references: [id])
-
-  //////////////////////////////////////////////////////
-  // STATUS
-  //////////////////////////////////////////////////////
-
-  status ApplicationStatus @default(APPLIED)
-
-  //////////////////////////////////////////////////////
-  // AI RESULTS
-  //////////////////////////////////////////////////////
-
-  overallScore Int?
-
-  aiSummary String?
-
-  matchedSkills String[]
-
-  missingSkills String[]
-
-  //////////////////////////////////////////////////////
-  // RELATIONS
-  //////////////////////////////////////////////////////
-
-  logs ProcessingLog[]
-
-  interview Interview?
-
-  scores CandidateScore?
-
-  //////////////////////////////////////////////////////
-  // TIMESTAMPS
-  //////////////////////////////////////////////////////
-
-  createdAt DateTime @default(now()) @db.Timestamptz(6)
-
-  updatedAt DateTime @updatedAt @db.Timestamptz(6)
-
-  //////////////////////////////////////////////////////
-  // INDEXES
-  //////////////////////////////////////////////////////
-
-  @@unique([candidateId, jobId])
-
-  @@index([candidateId])
-
-  @@index([jobId])
-
-  @@index([status])
-}
-
-//////////////////////////////////////////////////////
-// PROCESSING LOGS
-//////////////////////////////////////////////////////
-
-model ProcessingLog {
-  id String @id @default(uuid())
-
-  applicationId String
-
-  application Application @relation(fields: [applicationId], references: [id])
-
-  step String
-
-  status String
-
-  message String?
-
-  createdAt DateTime @default(now()) @db.Timestamptz(6)
-
-  @@index([applicationId])
-}
-
-//////////////////////////////////////////////////////
-// INTERVIEWS (PHASE 2)
-//////////////////////////////////////////////////////
-
-model Interview {
-  id String @id @default(uuid())
-
-  applicationId String      @unique
-  application   Application @relation(fields: [applicationId], references: [id])
-
-  status String
-
-  cheatScore   Int?
-  overallScore Int?
-
-  startedAt   DateTime?
-  completedAt DateTime?
-
-  questions InterviewQuestion[]
-
-  createdAt DateTime @default(now()) @db.Timestamptz(6)
-}
-
-//////////////////////////////////////////////////////
-// INTERVIEW QUESTIONS
-//////////////////////////////////////////////////////
-
-model InterviewQuestion {
-  id String @id @default(uuid())
-
-  interviewId String
-  interview   Interview @relation(fields: [interviewId], references: [id])
-
-  questionText String
-  type         String
-  options      Json?
-  correct      Json?
-
-  createdAt DateTime @default(now()) @db.Timestamptz(6)
-}
-
-//////////////////////////////////////////////////////
-// CANDIDATE SCORES
-//////////////////////////////////////////////////////
-
-model CandidateScore {
-  id String @id @default(uuid())
-
-  applicationId String      @unique
-  application   Application @relation(fields: [applicationId], references: [id])
-
-  resumeScore    Int?
-  interviewScore Int?
-  cheatScore     Int?
-  overallScore   Int?
-
-  createdAt DateTime @default(now()) @db.Timestamptz(6)
 }
