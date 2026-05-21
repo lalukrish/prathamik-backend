@@ -25,24 +25,19 @@ export const userRepository = {
           select: {
             id: true,
             name: true,
-            branch_name: true,
+          },
+        },
+
+        branch: {
+          select: {
+            id: true,
+            name: true,
           },
         },
       },
     });
   },
 
-  updateOrganizationBranch: async (orgId: string, branch_name: string) => {
-    return prisma.organization.update({
-      where: {
-        id: orgId,
-      },
-
-      data: {
-        branch_name,
-      },
-    });
-  },
   updateUser(id: string, data: any) {
     return prisma.user.update({
       where: { id },
