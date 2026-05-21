@@ -83,6 +83,7 @@ export class JobRepository {
     return prisma.job.findMany({
       where: {
         orgId,
+        disabled: false,
 
         ...(search && {
           title: {
@@ -123,18 +124,43 @@ export class JobRepository {
       throw new Error("Organization ID missing");
     }
 
-    return prisma.job.count({
-      where: {
-        orgId,
+    const baseWhere = {
+      orgId,
 
-        ...(search && {
-          title: {
-            contains: search,
-            mode: "insensitive",
+      ...(search && {
+        title: {
+          contains: search,
+          mode: "insensitive" as const,
+        },
+      }),
+    };
+
+    const [activeCount, disabledCount, totalCount] =
+      await Promise.all([
+        prisma.job.count({
+          where: {
+            ...baseWhere,
+            disabled: false,
           },
         }),
-      },
-    });
+
+        prisma.job.count({
+          where: {
+            ...baseWhere,
+            disabled: true,
+          },
+        }),
+
+        prisma.job.count({
+          where: baseWhere,
+        }),
+      ]);
+
+    return {
+      activeCount,
+      disabledCount,
+      totalCount,
+    };
   }
 
   async findById(id: string, orgId: string | null) {
@@ -147,11 +173,23 @@ export class JobRepository {
       where: {
         id,
         orgId,
+        disabled: false,
       },
     });
   }
 
   async update(id: string, data: any) {
+    const job = await prisma.job.findFirst({
+      where: {
+        id,
+        disabled: false,
+      },
+    });
+
+    if (!job) {
+      throw new Error("Job not found or disabled");
+    }
+
     return prisma.job.update({
       where: {
         id,
@@ -179,9 +217,12 @@ export class JobRepository {
       throw new Error("Job not found");
     }
 
-    return prisma.job.delete({
+    return prisma.job.update({
       where: {
         id,
+      },
+      data: {
+        disabled: true,
       },
     });
   }

@@ -21,7 +21,6 @@ export class JobService {
       niceToHave: data.niceToHave,
       experienceMin: data.experienceMin,
       experienceMax: data.experienceMax,
-      disabled: true,
 
       createdBy: userId,
       updatedBy: userId,
@@ -97,10 +96,10 @@ export class JobService {
     return {
       data: jobs,
       meta: {
-        total,
+        total: total.activeCount,
         page,
         limit,
-        totalPages: Math.ceil(total / limit),
+        totalPages: Math.ceil(total.activeCount / limit),
       },
     };
   }
