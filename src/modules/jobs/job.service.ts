@@ -1,8 +1,8 @@
 import DOMPurify from "isomorphic-dompurify";
-import { JobRepository } from "./job.repository";
+import { extractTextFromHTML } from "../../utils/html";
 import { EmbeddingService } from "../ai/embedding.service";
 import { VectorService } from "../ai/vector.service";
-import { extractTextFromHTML } from "../../utils/html";
+import { JobRepository } from "./job.repository";
 import { CreateJobDTO, UpdateJobDTO } from "./job.types";
 import { generateUniqueSlug } from "../../utils/generateSlug";
 
