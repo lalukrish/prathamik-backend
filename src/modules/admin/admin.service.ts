@@ -1,15 +1,19 @@
-// admin.service.ts
-
 import { prisma } from "../../config/db";
+import bcrypt from "bcrypt";
 
 export const organizationService = {
-  // CREATE ORGANIZATION
-  async createOrganization(data: { name: string; createdById: string }) {
-    // CHECK EXISTING ORGANIZATION
+  async createOrganizationWithAdmin(data: {
+    organizationName: string;
+
+    adminName: string;
+    adminEmail: string;
+    adminPassword: string;
+
+    createdById: string;
+  }) {
     const existingOrganization = await prisma.organization.findFirst({
       where: {
-        name: data.name,
-        createdById: data.createdById,
+        name: data.organizationName,
       },
     });
 
@@ -17,14 +21,49 @@ export const organizationService = {
       throw new Error("Organization already exists");
     }
 
-    return prisma.organization.create({
-      data: {
-        name: data.name,
-        createdById: data.createdById,
+    const existingAdmin = await prisma.user.findUnique({
+      where: {
+        email: data.adminEmail,
       },
     });
-  },
 
+    if (existingAdmin) {
+      throw new Error("Admin email already exists");
+    }
+
+    const hashedPassword = await bcrypt.hash(data.adminPassword, 10);
+
+    return prisma.$transaction(async (tx) => {
+      const organization = await tx.organization.create({
+        data: {
+          name: data.organizationName,
+          createdById: data.createdById,
+        },
+      });
+
+      const adminUser = await tx.user.create({
+        data: {
+          name: data.adminName,
+          email: data.adminEmail,
+          password: hashedPassword,
+
+          role: "admin",
+
+          orgId: organization.id,
+        },
+      });
+
+      return {
+        organization,
+        admin: {
+          id: adminUser.id,
+          name: adminUser.name,
+          email: adminUser.email,
+          role: adminUser.role,
+        },
+      };
+    });
+  },
   // GET ORGANIZATIONS OF PARTICULAR SUPER ADMIN
   async getAllOrganizations(createdById: string) {
     return prisma.organization.findMany({

@@ -4,30 +4,36 @@ import { Request, Response } from "express";
 import { organizationService } from "./admin.service";
 
 export class AdminController {
-  // CREATE ORGANIZATION
+  // admin.controller.ts
+
   async createOrganization(req: Request, res: Response) {
     try {
-      // USER FROM JWT
-
       const user = req.user;
-      console.log("user", user);
 
       // ONLY SUPER ADMIN
-      if (user.role !== "admin") {
+      if (user.role !== "super_admin") {
         return res.status(403).json({
           success: false,
           message: "Only super admin can create organization",
         });
       }
 
-      const organization = await organizationService.createOrganization({
-        name: req.body.name,
-        createdById: req.user.id,
-      });
+      const organization =
+        await organizationService.createOrganizationWithAdmin({
+          organizationName: req.body.organizationName,
+
+          // ADMIN DETAILS
+          adminName: req.body.adminName,
+          adminEmail: req.body.adminEmail,
+          adminPassword: req.body.adminPassword,
+
+          // SUPER ADMIN ID
+          createdById: user.id,
+        });
 
       res.status(201).json({
         success: true,
-        message: "Organization created successfully",
+        message: "Organization and admin created successfully",
         data: organization,
       });
     } catch (error: any) {
@@ -37,7 +43,6 @@ export class AdminController {
       });
     }
   }
-
   // GET ORGANIZATIONS CREATED BY SUPER ADMIN
   async getAllOrganizations(req: Request, res: Response) {
     try {
