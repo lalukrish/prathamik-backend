@@ -46,9 +46,7 @@ export const organizationService = {
           name: data.adminName,
           email: data.adminEmail,
           password: hashedPassword,
-
           role: "admin",
-
           orgId: organization.id,
         },
       });

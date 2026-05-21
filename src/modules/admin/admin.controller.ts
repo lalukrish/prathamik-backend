@@ -87,9 +87,9 @@ export class AdminController {
   // GET BRANCHES
   async getBranches(req: Request, res: Response) {
     try {
-      const branches = await organizationService.getBranches(
-        req.params.organizationId,
-      );
+      const organizationId = req.params.organizationId as string;
+
+      const branches = await organizationService.getBranches(organizationId);
 
       res.status(200).json({
         success: true,
