@@ -100,10 +100,10 @@ export class JobService {
     return {
       data: jobs,
       meta: {
-        total: total.activeCount,
+        total: total.totalCount,
         page,
         limit,
-        totalPages: Math.ceil(total.activeCount / limit),
+        totalPages: Math.ceil(total.totalCount / limit),
       },
     };
   }
