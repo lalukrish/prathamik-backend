@@ -5,7 +5,7 @@ const router = Router();
 
 const controller = new AdminController();
 
-router.post("/create-organisation", controller.createOrganization);
+router.post("/create-organization", controller.createOrganization);
 
 router.get("/organizations", controller.getAllOrganizations);
 
