@@ -1,8 +1,7 @@
-import { Request, Response, NextFunction } from "express";
-import { verifyAccessToken } from "../modules/auth/auth.service";
-import { authRepository } from "../modules/auth/auth.repository";
-import { AccessTokenPayload } from "../modules/auth/auth.types";
+import { NextFunction, Request, Response } from "express";
 import { prisma } from "../config/db";
+import { authRepository } from "../modules/auth/auth.repository";
+import { verifyAccessToken } from "../modules/auth/auth.service";
 
 export const authMiddleware = async (
   req: Request,
