@@ -9,6 +9,8 @@ router.post("/create-organisation", controller.createOrganization);
 
 router.get("/organizations", controller.getAllOrganizations);
 
+router.put("/organization/:id", controller.updateOrganization);
+
 router.post("/create-branch", controller.createBranch);
 
 router.get("/organizations/:organizationId/branches", controller.getBranches);

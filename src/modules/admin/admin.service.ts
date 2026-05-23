@@ -62,17 +62,155 @@ export const organizationService = {
       };
     });
   },
+
+  async updateOrganizationWithAdmin(
+    organizationId: string,
+    data: {
+      organizationName: string;
+
+      adminId: string;
+      adminName: string;
+      adminEmail: string;
+      adminPassword?: string;
+    },
+  ) {
+    const organization = await prisma.organization.findUnique({
+      where: {
+        id: organizationId,
+      },
+    });
+
+    if (!organization) {
+      throw new Error("Organization not found");
+    }
+
+    const admin = await prisma.user.findUnique({
+      where: {
+        id: data.adminId,
+      },
+    });
+
+    if (!admin) {
+      throw new Error("Admin not found");
+    }
+
+    // CHECK EMAIL DUPLICATE
+    const existingEmail = await prisma.user.findFirst({
+      where: {
+        email: data.adminEmail,
+        NOT: {
+          id: data.adminId,
+        },
+      },
+    });
+
+    if (existingEmail) {
+      throw new Error("Email already in use");
+    }
+
+    return prisma.$transaction(async (tx) => {
+      // UPDATE ORGANIZATION
+      const updatedOrganization = await tx.organization.update({
+        where: {
+          id: organizationId,
+        },
+
+        data: {
+          name: data.organizationName,
+        },
+      });
+
+      // UPDATE ADMIN
+      const updatedAdmin = await tx.user.update({
+        where: {
+          id: data.adminId,
+        },
+
+        data: {
+          name: data.adminName,
+          email: data.adminEmail,
+
+          ...(data.adminPassword && {
+            password: await bcrypt.hash(data.adminPassword, 10),
+          }),
+        },
+      });
+
+      return {
+        organization: updatedOrganization,
+
+        admin: {
+          id: updatedAdmin.id,
+          name: updatedAdmin.name,
+          email: updatedAdmin.email,
+          role: updatedAdmin.role,
+        },
+      };
+    });
+  },
+
   // GET ORGANIZATIONS OF PARTICULAR SUPER ADMIN
-  async getAllOrganizations(createdById: string) {
+  async getAllOrganizations(
+    createdById: string,
+    page: number,
+    limit: number,
+    search: string,
+  ) {
+    const skip = (page - 1) * limit;
+
     return prisma.organization.findMany({
       where: {
         createdById,
+
+        OR: [
+          {
+            name: {
+              contains: search,
+              mode: "insensitive",
+            },
+          },
+          {
+            users: {
+              some: {
+                name: {
+                  contains: search,
+                  mode: "insensitive",
+                },
+              },
+            },
+          },
+          {
+            users: {
+              some: {
+                email: {
+                  contains: search,
+                  mode: "insensitive",
+                },
+              },
+            },
+          },
+        ],
       },
+
+      skip,
+      take: limit,
 
       select: {
         id: true,
         name: true,
         createdAt: true,
+
+        users: {
+          where: {
+            role: "admin",
+          },
+
+          select: {
+            id: true,
+            name: true,
+            email: true,
+          },
+        },
       },
 
       orderBy: {

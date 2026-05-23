@@ -135,26 +135,25 @@ export class JobRepository {
       }),
     };
 
-    const [activeCount, disabledCount, totalCount] =
-      await Promise.all([
-        prisma.job.count({
-          where: {
-            ...baseWhere,
-            disabled: false,
-          },
-        }),
+    const [activeCount, disabledCount, totalCount] = await Promise.all([
+      prisma.job.count({
+        where: {
+          ...baseWhere,
+          disabled: false,
+        },
+      }),
 
-        prisma.job.count({
-          where: {
-            ...baseWhere,
-            disabled: true,
-          },
-        }),
+      prisma.job.count({
+        where: {
+          ...baseWhere,
+          disabled: true,
+        },
+      }),
 
-        prisma.job.count({
-          where: baseWhere,
-        }),
-      ]);
+      prisma.job.count({
+        where: baseWhere,
+      }),
+    ]);
 
     return {
       activeCount,
