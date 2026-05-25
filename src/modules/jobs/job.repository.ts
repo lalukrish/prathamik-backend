@@ -83,7 +83,6 @@ export class JobRepository {
     return prisma.job.findMany({
       where: {
         orgId,
-        disabled: false,
 
         ...(search && {
           title: {
@@ -170,9 +169,8 @@ export class JobRepository {
 
     return prisma.job.findFirst({
       where: {
-        id,
+        slug: id,
         orgId,
-        disabled: false,
       },
     });
   }
@@ -181,7 +179,6 @@ export class JobRepository {
     const job = await prisma.job.findFirst({
       where: {
         id,
-        disabled: false,
       },
     });
 
@@ -207,7 +204,7 @@ export class JobRepository {
     // CHECK JOB EXISTS
     const job = await prisma.job.findFirst({
       where: {
-        id,
+        slug: id,
         orgId,
       },
     });
@@ -218,10 +215,10 @@ export class JobRepository {
 
     return prisma.job.update({
       where: {
-        id,
+        slug: id,
       },
       data: {
-        disabled: true,
+        disabled: !job.disabled,
       },
     });
   }

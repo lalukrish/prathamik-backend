@@ -4,6 +4,7 @@ import { EmbeddingService } from "../ai/embedding.service";
 import { VectorService } from "../ai/vector.service";
 import { JobRepository } from "./job.repository";
 import { CreateJobDTO, UpdateJobDTO } from "./job.types";
+import { generateUniqueSlug } from "../../utils/generateSlug";
 
 const jobRepo = new JobRepository();
 
@@ -12,9 +13,12 @@ export class JobService {
     const cleanHtml = DOMPurify.sanitize(data.jdHtml);
 
     const description = extractTextFromHTML(cleanHtml);
+    const slug = await generateUniqueSlug(data.title);
+
 
     const job = await jobRepo.create({
       title: data.title,
+      slug,
       jdHtml: cleanHtml,
       description,
       requiredSkills: data.requiredSkills,
@@ -96,10 +100,10 @@ export class JobService {
     return {
       data: jobs,
       meta: {
-        total: total.activeCount,
+        total: total.totalCount,
         page,
         limit,
-        totalPages: Math.ceil(total.activeCount / limit),
+        totalPages: Math.ceil(total.totalCount / limit),
       },
     };
   }
