@@ -105,6 +105,9 @@ model Job {
   updatedAt      DateTime               @updatedAt @db.Timestamptz(6)
   updatedBy      String?
   jdHtml         String?
+  lastDate       DateTime?
+  location       String?
+  workMode       String?
   disabled       Boolean                @default(false)
   applications   Application[]
   creator        User                   @relation("JobCreatedBy", fields: [createdBy], references: [id])

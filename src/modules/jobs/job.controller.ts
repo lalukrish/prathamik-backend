@@ -48,7 +48,6 @@ export class JobController {
   async getAll(req: Request, res: Response) {
     try {
       const orgId = req.user?.orgId;
-
       if (!orgId) {
         throw new Error("Organization ID is required");
       }
