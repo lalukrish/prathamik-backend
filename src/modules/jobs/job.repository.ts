@@ -222,4 +222,56 @@ export class JobRepository {
       },
     });
   }
+
+  // GET APPLIED CANDIDATES FOR PARTICULAR JOB
+
+  async getAppliedCandidatesByJobId(
+    jobId: string,
+    skip: number,
+    limit: number,
+  ) {
+    return prisma.application.findMany({
+      where: {
+        jobId,
+      },
+
+      select: {
+        id: true,
+        status: true,
+        overallScore: true,
+        matchedSkills: true,
+        missingSkills: true,
+        createdAt: true,
+
+        candidate: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+            phone: true,
+            currentRole: true,
+            totalExperience: true,
+            skills: true,
+            linkedinUrl: true,
+            createdAt: true,
+          },
+        },
+
+        resume: {
+          select: {
+            id: true,
+            resumeUrl: true,
+            fileName: true,
+          },
+        },
+      },
+
+      skip,
+      take: limit,
+
+      orderBy: {
+        createdAt: "desc",
+      },
+    });
+  }
 }

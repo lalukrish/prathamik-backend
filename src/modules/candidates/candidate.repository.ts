@@ -47,7 +47,27 @@ export const candidateRepository = {
   ) => {
     return prisma.candidate.findMany({
       where: isBlocked !== undefined ? { isBlocked } : {},
-
+      include: {
+        applications: {
+          select: {
+            id: true,
+            jobId: true,
+            candidateId: true,
+            candidate: true,
+            resumeId: true,
+            job: true,
+            matchedSkills: true,
+            interview: true,
+            missingSkills: true,
+            overallScore: true,
+            scores: true,
+            status: true,
+            resume: true,
+            createdAt: true,
+            updatedAt: true,
+          },
+        },
+      },
       skip,
       take: limit,
     });
@@ -216,6 +236,56 @@ export const candidateRepository = {
       where: { id },
       data: {
         isBlocked,
+      },
+    });
+  }, // GET APPLIED CANDIDATES FOR PARTICULAR JOB
+
+  getAppliedCandidatesByJobId: async (
+    jobId: string,
+    skip: number,
+    limit: number,
+  ) => {
+    return prisma.application.findMany({
+      where: {
+        jobId,
+      },
+
+      select: {
+        id: true,
+        status: true,
+        overallScore: true,
+        matchedSkills: true,
+        missingSkills: true,
+        createdAt: true,
+
+        candidate: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+            phone: true,
+            currentRole: true,
+            totalExperience: true,
+            skills: true,
+            linkedinUrl: true,
+            createdAt: true,
+          },
+        },
+
+        resume: {
+          select: {
+            id: true,
+            resumeUrl: true,
+            fileName: true,
+          },
+        },
+      },
+
+      skip,
+      take: limit,
+
+      orderBy: {
+        createdAt: "desc",
       },
     });
   },

@@ -15,7 +15,6 @@ export class JobService {
     const description = extractTextFromHTML(cleanHtml);
     const slug = await generateUniqueSlug(data.title);
 
-
     const job = await jobRepo.create({
       title: data.title,
       slug,
@@ -114,5 +113,10 @@ export class JobService {
 
   async deleteJob(id: string, orgId: string | null) {
     return jobRepo.delete(id, orgId);
+  }
+  async getAppliedCandidates(jobId: string, page: number, limit: number) {
+    const skip = (page - 1) * limit;
+
+    return jobRepo.getAppliedCandidatesByJobId(jobId, skip, limit);
   }
 }
