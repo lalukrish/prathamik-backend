@@ -11,7 +11,7 @@ const router = Router();
 const controller = new JobController();
 
 // private routes
-router.use("/jobs", authMiddleware, jobRoutes);
+router.use("/jobs", jobRoutes);
 router.use("/auth", authRoutes);
 router.use("/user", authMiddleware, userRoutes);
 router.use("/candidate", authMiddleware, candidateRoutes);
