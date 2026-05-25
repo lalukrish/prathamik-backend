@@ -14,7 +14,7 @@ export class JobService {
 
     const description = extractTextFromHTML(cleanHtml);
     const slug = await generateUniqueSlug(data.title);
-
+    console.log("data: job data", data);
 
     const job = await jobRepo.create({
       title: data.title,
@@ -25,6 +25,9 @@ export class JobService {
       niceToHave: data.niceToHave,
       experienceMin: data.experienceMin,
       experienceMax: data.experienceMax,
+      lastDate: data.lastDate,
+      location: data.location,
+      workMode: data.workMode,
 
       createdBy: userId,
       updatedBy: userId,
@@ -91,7 +94,6 @@ export class JobService {
 
   async getJobs(orgId: string, page: number, limit: number, search: string) {
     const skip = (page - 1) * limit;
-
     const [jobs, total] = await Promise.all([
       jobRepo.findAll(orgId, skip, limit, search),
       jobRepo.count(orgId, search),
