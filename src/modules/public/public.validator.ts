@@ -16,7 +16,7 @@ export const applyJobSchema = z.object({
 
     currentRole: z.string().optional(),
 
-    totalExperience: z.string().transform(Number).optional(),
+    totalExperience: z.string().optional(),
 
     skills: z.string().transform((value) => JSON.parse(value || "[]")),
 
