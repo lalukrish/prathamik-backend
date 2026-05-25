@@ -15,7 +15,14 @@ router.post(
   //  validate(createJobSchema),
   controller.create.bind(controller),
 );
-router.get("/", controller.getAll.bind(controller));
+router.get(
+  "/",
+  (req, res, next) => {
+    console.log("get JOB ROUTE HIT");
+    next();
+  },
+  controller.getAll.bind(controller),
+);
 router.get("/:id", controller.getOne.bind(controller));
 router.put(
   "/:id",
