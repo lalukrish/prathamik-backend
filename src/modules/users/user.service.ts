@@ -26,11 +26,29 @@ export const userService = {
       if (!data.branchId) {
         throw new Error("Branch is required");
       }
+
+      const organization = await userRepository.findOrganizationById(
+        data.orgId,
+      );
+
+      if (!organization) {
+        throw new Error("Organization not found");
+      }
+
+      const branch = await userRepository.findBranchById(data.branchId);
+
+      if (!branch) {
+        throw new Error("Branch not found");
+      }
+
+      if (branch.organizationId !== data.orgId) {
+        throw new Error("Selected branch does not belong to organization");
+      }
     }
 
     const hashedPassword = await bcrypt.hash(data.password, 10);
 
-    const user = await userRepository.createUser({
+    return userRepository.createUser({
       name: data.name,
       email: data.email,
       password: hashedPassword,
@@ -42,8 +60,6 @@ export const userService = {
 
       isActive: data.isActive ?? true,
     });
-
-    return user;
   },
   updateUser: async (id: string, data: UpdateUserInput) => {
     const existing = await userRepository.findByUserId(id);

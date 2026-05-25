@@ -72,7 +72,7 @@ export const userRepository = {
           select: {
             id: true,
             name: true,
-            branch_name: true,
+            // branch_name: true,
             createdAt: true,
           },
         },
@@ -86,6 +86,20 @@ export const userRepository = {
         ...(isActive !== undefined && { isActive }),
 
         ...(role && { role: role as Role }),
+      },
+    });
+  },
+  findOrganizationById: async (orgId: string) => {
+    return prisma.organization.findUnique({
+      where: {
+        id: orgId,
+      },
+    });
+  },
+  findBranchById: async (branchId: string) => {
+    return prisma.branch.findUnique({
+      where: {
+        id: branchId,
       },
     });
   },
