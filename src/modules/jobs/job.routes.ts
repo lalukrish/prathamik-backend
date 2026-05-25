@@ -18,7 +18,7 @@ router.post(
 router.get(
   "/",
   (req, res, next) => {
-    console.log("get JOB ROUTE HIT");
+    console.log("get JOB ROUTE HIT.");
     next();
   },
   controller.getAll.bind(controller),
