@@ -6,13 +6,9 @@ export const uploadResumeToStorage = async (
 ) => {
   const fileExt = file.originalname.split(".").pop();
 
-  const fileName = `
-${Date.now()}.${fileExt}
-`;
+  const fileName = `${Date.now()}.${fileExt}`;
 
-  const filePath = `
-${candidateId}/${fileName}
-`;
+  const filePath = `${candidateId}/${fileName}`;
 
   const { data, error } = await supabase.storage
     .from("i-bucket")
@@ -21,8 +17,22 @@ ${candidateId}/${fileName}
     });
 
   if (error) {
-    throw error;
+    console.error("SUPABASE UPLOAD ERROR:", error);
+    throw new Error(error.message);
   }
 
-  return data.path;
+  const { data: signedUrlData, error: signedUrlError } =
+    await supabase.storage
+      .from("i-bucket")
+      .createSignedUrl(filePath, 3600);
+
+  if (signedUrlError) {
+    console.error("SIGNED URL ERROR:", signedUrlError);
+    throw new Error(signedUrlError.message);
+  }
+
+  return {
+    storagePath: filePath,
+    resumeUrl: signedUrlData.signedUrl,
+  };
 };

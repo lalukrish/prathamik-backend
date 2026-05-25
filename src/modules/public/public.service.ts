@@ -2,7 +2,11 @@ import { prisma } from "../../config/db";
 
 import { ApplyJobDTO } from "./public.types";
 
-import { uploadResumeToStorage } from "./resume.service";
+import { uploadResumeToStorage }
+  from "./resume.service";
+
+import { applicationQueue }
+  from "../applications/application.queue";
 
 export class PublicService {
   async applyJob(
@@ -10,77 +14,131 @@ export class PublicService {
     payload: ApplyJobDTO,
     file?: Express.Multer.File,
   ) {
-    const job = await prisma.job.findUnique({
-      where: {
-        id: jobId,
-      },
-    });
+    // ============================================
+    // Find Job
+    // ============================================
 
-    if (!job) {
-      throw new Error("Job not found");
-    }
-
-    const existingCandidate = await prisma.candidate.findFirst({
-      where: {
-        email: payload.email,
-      },
-    });
-
-    if (existingCandidate) {
-      const existingApplication = await prisma.application.findFirst({
+    const job =
+      await prisma.job.findUnique({
         where: {
-          candidateId: existingCandidate.id,
-
-          jobId,
+          id: jobId,
         },
       });
 
+    if (!job) {
+      throw new Error(
+        "Job not found",
+      );
+    }
+
+    // ============================================
+    // Find Existing Candidate
+    // ============================================
+
+    const existingCandidate =
+      await prisma.candidate.findFirst({
+        where: {
+          email: payload.email,
+        },
+      });
+
+    // ============================================
+    // Prevent Duplicate Application
+    // ============================================
+
+    if (existingCandidate) {
+      const existingApplication =
+        await prisma.application.findFirst({
+          where: {
+            candidateId:
+              existingCandidate.id,
+
+            jobId,
+          },
+        });
+
       if (existingApplication) {
-        throw new Error("Already applied for this job");
+        throw new Error(
+          "Already applied for this job",
+        );
       }
     }
 
-    let candidate = existingCandidate;
+    // ============================================
+    // Create Candidate
+    // ============================================
+
+    let candidate =
+      existingCandidate;
 
     if (!candidate) {
-      candidate = await prisma.candidate.create({
-        data: {
-          name: payload.name,
+      candidate =
+        await prisma.candidate.create({
+          data: {
+            name:
+              payload.name,
 
-          email: payload.email,
+            email:
+              payload.email,
 
-          phone: payload.phone,
+            phone:
+              payload.phone,
 
-          currentRole: payload.currentRole,
+            // AI will populate later
+            skills: [],
 
-          totalExperience: payload.totalExperience
-            ? parseFloat(payload.totalExperience)
-            : null,
-          skills: payload.skills || [],
+            totalExperience:
+              payload.totalExperience
+                ? parseFloat(
+                  payload.totalExperience,
+                )
+                : null,
 
-          expectedSalary: payload.expectedSalary,
+            expectedSalary:
+              payload.expectedSalary ||
+              null,
 
-          currentCTC: payload.currentCTC,
+            currentCTC:
+              payload.currentCTC ||
+              null,
 
-          noticePeriod: payload.noticePeriod,
+            noticePeriod:
+              payload.noticePeriod ||
+              null,
 
-          isOnNoticePeriod: payload.isOnNoticePeriod,
+            isOnNoticePeriod:
+              payload.isOnNoticePeriod ||
+              false,
 
-          linkedinUrl: payload.linkedinUrl,
-
-          orgId: job.orgId,
-        },
-      });
+            orgId: job.orgId,
+          },
+        });
     }
 
-    let resumeId: string | undefined;
+    // ============================================
+    // Upload Resume
+    // ============================================
+
+    let resumeId:
+      | string
+      | undefined;
+
     if (file) {
-      const resumeUrl = await uploadResumeToStorage(file, candidate.id);
+      const uploadedResume =
+        await uploadResumeToStorage(
+          file,
+          candidate.id,
+        );
+      console.log("uploadedResume", uploadedResume);
       const resume = await prisma.resume.create({
         data: {
           candidateId: candidate.id,
 
-          resumeUrl,
+          resumeUrl:
+            uploadedResume.resumeUrl,
+
+          storagePath:
+            uploadedResume.storagePath,
 
           fileName: file.originalname,
 
@@ -92,17 +150,60 @@ export class PublicService {
 
       resumeId = resume.id;
     }
-    const application = await prisma.application.create({
-      data: {
-        candidateId: candidate.id,
-        jobId,
-        resumeId,
-        // source: "applied",
+
+    // ============================================
+    // Create Application
+    // ============================================
+
+    const application =
+      await prisma.application.create({
+        data: {
+          candidateId:
+            candidate.id,
+
+          jobId,
+
+          resumeId,
+
+          processingStatus:
+            "queued",
+        },
+      });
+
+    // ============================================
+    // Queue Resume Processing
+    // ============================================
+
+    await applicationQueue.add(
+      "parse-resume",
+
+      {
+        applicationId:
+          application.id,
       },
-    });
+
+      {
+        attempts: 3,
+
+        backoff: {
+          type: "exponential",
+
+          delay: 5000,
+        },
+
+        removeOnComplete: true,
+
+        removeOnFail: false,
+      },
+    );
+
+    // ============================================
+    // Return Response
+    // ============================================
 
     return {
       candidate,
+
       application,
     };
   }
