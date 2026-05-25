@@ -48,11 +48,9 @@ export class JobController {
   async getAll(req: Request, res: Response) {
     try {
       const orgId = req.user?.orgId;
-      console.log("first>>>>",req.user)
       if (!orgId) {
         throw new Error("Organization ID is required");
       }
-
       const page = parseInt(req.query.page as string) || 1;
       const limit = parseInt(req.query.limit as string) || 10;
       const search = (req.query.search as string) || "";
@@ -73,7 +71,7 @@ export class JobController {
       }
 
       const job = await jobService.getJob(req.params.id, orgId);
-      console.log(job)
+      console.log(job);
       res.json({ success: true, data: job });
     } catch (error) {
       logger.error({ error: error, message: "Failed to get job" });

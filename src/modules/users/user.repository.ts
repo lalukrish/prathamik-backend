@@ -76,6 +76,12 @@ export const userRepository = {
             createdAt: true,
           },
         },
+        branch: {
+          select: {
+            id: true,
+            name: true,
+          },
+        },
       },
     });
   },

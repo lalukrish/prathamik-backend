@@ -6,8 +6,23 @@ import { createJobSchema, updateJobSchema } from "./job.validator";
 const router = Router();
 const controller = new JobController();
 
-router.post("/", validate(createJobSchema), controller.create.bind(controller));
-router.get("/", controller.getAll.bind(controller));
+router.post(
+  "/",
+  (req, res, next) => {
+    console.log("CREATE JOB ROUTE HIT");
+    next();
+  },
+  //  validate(createJobSchema),
+  controller.create.bind(controller),
+);
+router.get(
+  "/",
+  (req, res, next) => {
+    console.log("get JOB ROUTE HIT.");
+    next();
+  },
+  controller.getAll.bind(controller),
+);
 router.get("/:id", controller.getOne.bind(controller));
 router.put(
   "/:id",

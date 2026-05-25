@@ -53,8 +53,9 @@ export class PublicService {
 
           currentRole: payload.currentRole,
 
-          totalExperience: payload.totalExperience,
-
+          totalExperience: payload.totalExperience
+            ? parseFloat(payload.totalExperience)
+            : null,
           skills: payload.skills || [],
 
           expectedSalary: payload.expectedSalary,

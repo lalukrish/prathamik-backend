@@ -211,6 +211,13 @@ export const organizationService = {
             email: true,
           },
         },
+        branches: {
+          select: {
+            id: true,
+            name: true,
+            createdAt: true,
+          },
+        },
       },
 
       orderBy: {
