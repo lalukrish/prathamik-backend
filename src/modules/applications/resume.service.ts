@@ -1,31 +1,82 @@
-import { supabase } from "../../config/supabase";
+import path from "path";
 
-export const uploadResumeToStorage = async (
-    file: Express.Multer.File,
-    organizationId: string,
-    candidateId: string
-) => {
-    const fileExt =
-        file.originalname.split(".").pop();
+import { supabase }
+    from "../../config/supabase";
 
-    const fileName = `
-${Date.now()}.${fileExt}
-`;
+export const uploadResumeToStorage =
+    async (
+        file: Express.Multer.File,
 
-    const filePath = `
-${organizationId}/${candidateId}/${fileName}
-`;
+        organizationId: string,
 
-    const { data, error } = await supabase
-        .storage
-        .from("resumes")
-        .upload(filePath, file.buffer, {
-            contentType: file.mimetype,
-        });
+        candidateId: string,
+    ) => {
+        // ============================================
+        // File Extension
+        // ============================================
 
-    if (error) {
-        throw error;
-    }
+        const fileExt =
+            path.extname(
+                file.originalname,
+            );
 
-    return data.path;
-};
+        // ============================================
+        // File Name
+        // ============================================
+
+        const fileName =
+            `${Date.now()}${fileExt}`;
+
+        // ============================================
+        // File Path
+        // ============================================
+
+        const filePath = path.join(
+            organizationId,
+            candidateId,
+            fileName,
+        );
+
+        // ============================================
+        // Upload File
+        // ============================================
+
+        const { data, error } =
+            await supabase.storage
+                .from("resumes")
+                .upload(
+                    filePath,
+                    file.buffer,
+                    {
+                        contentType:
+                            file.mimetype,
+
+                        upsert: false,
+                    },
+                );
+
+        if (error) {
+            throw error;
+        }
+
+        // ============================================
+        // Public URL
+        // ============================================
+
+        const {
+            data: publicUrlData,
+        } = supabase.storage
+            .from("resumes")
+            .getPublicUrl(data.path);
+
+        // ============================================
+        // Return
+        // ============================================
+
+        return {
+            path: data.path,
+
+            publicUrl:
+                publicUrlData.publicUrl,
+        };
+    };
