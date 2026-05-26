@@ -166,7 +166,7 @@ export class PublicService {
           resumeId,
 
           processingStatus:
-            "queued",
+            "QUEUED",
         },
       });
 
