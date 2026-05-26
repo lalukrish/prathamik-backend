@@ -8,53 +8,55 @@ datasource db {
 }
 
 model Organization {
-  id          String   @id @default(uuid())
-  name        String 
-  createdById String?
-  createdBy   User? @relation("OrganizationCreatedBy",fields: [createdById], references: [id] )
-  branches    Branch[]
-  users       User[]
-  jobs        Job[]
-  candidates  Candidate[]
-  createdAt   DateTime @default(now()) @db.Timestamptz(6)
+  id                 String              @id @default(uuid())
+  name               String
+  createdById        String?
+  createdBy          User?               @relation("OrganizationCreatedBy", fields: [createdById], references: [id])
+  branches           Branch[]
+  users              User[]
+  jobs               Job[]
+  candidates         Candidate[]
+  createdAt          DateTime            @default(now()) @db.Timestamptz(6)
+  questionBanks      QuestionBank[]
+  interviewTemplates InterviewTemplate[]
 }
 
 model Branch {
-  id             String @id @default(uuid())
+  id String @id @default(uuid())
 
-  name           String
+  name String
 
   organizationId String
   organization   Organization @relation(fields: [organizationId], references: [id])
   users          User[]
-  createdAt      DateTime @default(now()) @db.Timestamptz(6)
+  createdAt      DateTime     @default(now()) @db.Timestamptz(6)
 }
 
 model User {
-  id           String   @id @default(uuid())
-  name         String?
-  email        String   @unique
-  password     String
-  role         Role
+  id       String  @id @default(uuid())
+  name     String?
+  email    String  @unique
+  password String
+  role     Role
 
   orgId        String?
   organization Organization? @relation(fields: [orgId], references: [id])
 
   createdOrganizations Organization[] @relation("OrganizationCreatedBy")
 
-  branchId  String?
-  branch    Branch? @relation(fields: [branchId], references: [id])
+  branchId String?
+  branch   Branch? @relation(fields: [branchId], references: [id])
 
-  createdAt    DateTime @default(now()) @db.Timestamptz(6)
-  updatedAt    DateTime @updatedAt @db.Timestamptz(6)
+  createdAt DateTime @default(now()) @db.Timestamptz(6)
+  updatedAt DateTime @updatedAt @db.Timestamptz(6)
 
-  isActive     Boolean @default(true)
+  isActive Boolean @default(true)
 
-  candidates   Candidate[]
-  createdJobs  Job[] @relation("JobCreatedBy")
-  updatedJobs  Job[] @relation("JobUpdatedBy")
-  sessions     Session[]
-  profile      UserProfile?
+  candidates  Candidate[]
+  createdJobs Job[]        @relation("JobCreatedBy")
+  updatedJobs Job[]        @relation("JobUpdatedBy")
+  sessions    Session[]
+  profile     UserProfile?
 }
 
 model UserProfile {
@@ -113,15 +115,16 @@ model Job {
   creator        User                   @relation("JobCreatedBy", fields: [createdBy], references: [id])
   organization   Organization           @relation(fields: [orgId], references: [id])
   updater        User?                  @relation("JobUpdatedBy", fields: [updatedBy], references: [id])
+  questionBanks      QuestionBank[]
+  interviewTemplates InterviewTemplate[]
 }
-
 
 model Candidate {
   id               String        @id @default(uuid())
   /// ///////////////////////////////////////////////////
   /// ///////////////////////////////////////////////////
   name             String
-  email            String @unique
+  email            String        @unique
   phone            String?
   /// ///////////////////////////////////////////////////
   /// ///////////////////////////////////////////////////
@@ -137,7 +140,7 @@ model Candidate {
   linkedinUrl      String?
   skills           String[]
   totalExperience  Float?
-  parsedData Json?
+  parsedData       Json?
   currentCTC       Float?
   expectedSalary   Float?
   isOnNoticePeriod Boolean       @default(false)
@@ -151,8 +154,7 @@ model Candidate {
   updatedAt        DateTime      @updatedAt @db.Timestamptz(6)
   /// ///////////////////////////////////////////////////
   /// ///////////////////////////////////////////////////
-  
-  
+
   @@index([email])
   @@index([phone])
   @@index([orgId])
@@ -179,52 +181,51 @@ model Resume {
   // Relations
   // ============================================
 
-  candidate Candidate @relation(fields: [candidateId],references: [id])
+  candidate Candidate @relation(fields: [candidateId], references: [id])
 
   applications Application[]
 }
 
-
 model Application {
-  id            String            @id @default(uuid())
+  id String @id @default(uuid())
 
   // =====================================================
   // Relations
   // =====================================================
 
-  jobId         String
-  candidateId   String
-  resumeId      String?
+  jobId       String
+  candidateId String
+  resumeId    String?
 
-  candidate     Candidate         @relation(fields: [candidateId], references: [id])
+  candidate Candidate @relation(fields: [candidateId], references: [id])
 
-  job           Job               @relation(fields: [jobId], references: [id])
+  job Job @relation(fields: [jobId], references: [id])
 
-  resume        Resume?           @relation(fields: [resumeId], references: [id])
+  resume Resume? @relation(fields: [resumeId], references: [id])
 
   // =====================================================
   // Application Status
   // =====================================================
 
-  status        ApplicationStatus @default(APPLIED)
+  status ApplicationStatus @default(APPLIED)
 
   // =====================================================
   // AI Processing
   // =====================================================
 
-  processingStatus String         @default("queued")
+  processingStatus ProcessingStatus @default(QUEUED)
 
-  processingError  String?
+  processingError String?
 
-  parsedData       Json?
+  parsedData Json?
 
   // =====================================================
   // AI Evaluation
   // =====================================================
 
-  overallScore  Int?
+  overallScore Int?
 
-  aiSummary     String?
+  aiSummary String?
 
   matchedSkills String[]
 
@@ -234,32 +235,28 @@ model Application {
   // Timestamps
   // =====================================================
 
-  createdAt     DateTime          @default(now()) @db.Timestamptz(6)
+  createdAt DateTime @default(now()) @db.Timestamptz(6)
 
-  updatedAt     DateTime          @updatedAt @db.Timestamptz(6)
+  updatedAt DateTime @updatedAt @db.Timestamptz(6)
 
   // =====================================================
   // Future Relations
   // =====================================================
 
-  scores        CandidateScore?
+  scores CandidateScore?
 
-  interview     Interview?
+  interview Interview?
 
-  logs          ProcessingLog[]
+  logs ProcessingLog[]
 
   // =====================================================
   // Indexes
   // =====================================================
 
   @@unique([candidateId, jobId])
-
   @@index([candidateId])
-
   @@index([jobId])
-
   @@index([status])
-
   @@index([processingStatus])
 }
 
@@ -276,27 +273,195 @@ model ProcessingLog {
 }
 
 model Interview {
-  id            String              @id @default(uuid())
-  applicationId String              @unique
-  status        String
-  cheatScore    Int?
-  overallScore  Int?
-  startedAt     DateTime?
-  completedAt   DateTime?
-  createdAt     DateTime            @default(now()) @db.Timestamptz(6)
-  application   Application         @relation(fields: [applicationId], references: [id])
-  questions     InterviewQuestion[]
+  id                   String                   @id @default(uuid())
+  applicationId        String                   @unique
+  templateId           String?
+  accessToken          String?                  @unique
+  status               InterviewStatus          @default(PENDING)
+  totalQuestions       Int?
+  totalScore           Int?
+  cheatScore           Int?
+  suspiciousEvents     Int                      @default(0)
+  riskLevel            SecuritySeverity?
+  scheduledStartAt     DateTime?
+  scheduledEndAt       DateTime?
+  startedAt            DateTime?
+  startedByCandidateAt DateTime?
+  completedAt          DateTime?
+  submittedAt          DateTime?
+  expiresAt            DateTime?
+  isSubmitted          Boolean                  @default(false)
+  createdBy            String?
+  createdAt            DateTime                 @default(now()) @db.Timestamptz(6)
+  application          Application              @relation(fields: [applicationId], references: [id])
+  template             InterviewTemplate?       @relation(fields: [templateId], references: [id])
+  questions            InterviewQuestion[]
+  answers              InterviewAnswer[]
+  securityEvents       InterviewSecurityEvent[]
+  submittedBySystem    Boolean                  @default(false)
+
+  @@index([status])
+  @@index([scheduledStartAt])
 }
 
 model InterviewQuestion {
-  id           String    @id @default(uuid())
-  interviewId  String
-  questionText String
-  type         String
-  options      Json?
-  correct      Json?
-  createdAt    DateTime  @default(now()) @db.Timestamptz(6)
-  interview    Interview @relation(fields: [interviewId], references: [id])
+  id               String            @id @default(uuid())
+  interviewId      String
+  questionBankId   String?
+  question         String
+  type             QuestionType
+  difficulty       DifficultyLevel?
+  skillTags        String[]
+  options          Json?
+  correctAnswer    Json?
+  expectedAnswer   String?
+  audioUrl         String?
+  aiGenerated      Boolean           @default(false)
+  order            Int
+  maxScore         Int               @default(10)
+  createdAt        DateTime          @default(now())
+  interview        Interview         @relation(fields: [interviewId], references: [id])
+  questionBank     QuestionBank?     @relation(fields: [questionBankId], references: [id])
+  answers          InterviewAnswer[]
+  timeLimitSeconds Int?
+
+  @@index([interviewId])
+}
+
+model InterviewAnswer {
+  id              String            @id @default(uuid())
+  interviewId     String
+  questionId      String
+  answerText      String?
+  selectedOptions Json?
+  audioAnswerUrl  String?
+  transcription   String?
+  score           Int?
+  aiFeedback      String?
+  cheatingFlag    Boolean           @default(false)
+  answeredAt      DateTime          @default(now())
+  interview       Interview         @relation(fields: [interviewId], references: [id])
+  question        InterviewQuestion @relation(fields: [questionId], references: [id])
+  durationSeconds Int?
+
+  @@index([interviewId])
+  @@index([questionId])
+}
+
+model QuestionBank {
+  id                 String                      @id @default(uuid())
+  orgId              String
+  jobId              String?
+  title              String?
+  question           String
+  type               QuestionType
+  difficulty         DifficultyLevel
+  skillTags          String[]
+  options            Json?
+  correctAnswer      Json?
+  expectedAnswer     String?
+  audioUrl           String?
+  aiGenerated        Boolean                     @default(false)
+  createdBy          String?
+  isActive           Boolean                     @default(true)
+  createdAt          DateTime                    @default(now())
+  organization       Organization                @relation(fields: [orgId], references: [id])
+  job                Job?                        @relation(fields: [jobId], references: [id])
+  version            Int                         @default(1)
+  templateQuestions  InterviewTemplateQuestion[]
+  interviewQuestions InterviewQuestion[]
+
+  @@index([jobId])
+  @@index([orgId])
+}
+
+model InterviewTemplate {
+  id              String                      @id @default(uuid())
+  orgId           String
+  jobId           String?
+  title           String
+  description     String?
+  durationMinutes Int?
+  totalQuestions  Int?
+  aiQuestionCount Int                         @default(0)
+  createdBy       String?
+  createdAt       DateTime                    @default(now())
+  organization    Organization                @relation(fields: [orgId], references: [id])
+  job             Job?                        @relation(fields: [jobId], references: [id])
+  questions       InterviewTemplateQuestion[]
+  interviews      Interview[]
+}
+
+model InterviewTemplateQuestion {
+  id             String            @id @default(uuid())
+  templateId     String
+  questionBankId String
+  order          Int
+  weight         Int               @default(10)
+  isRequired     Boolean           @default(true)
+  template       InterviewTemplate @relation(fields: [templateId], references: [id])
+  question       QuestionBank      @relation(fields: [questionBankId], references: [id])
+
+  @@index([templateId])
+  @@index([questionBankId])
+}
+
+enum QuestionType {
+  TEXT
+  MULTIPLE_SELECT
+  RADIO
+  VOICE_SPEAK
+  VOICE_TYPE
+}
+
+enum DifficultyLevel {
+  EASY
+  MEDIUM
+  HARD
+}
+
+enum InterviewStatus {
+  PENDING
+  IN_PROGRESS
+  COMPLETED
+  CANCELLED
+}
+
+model InterviewSecurityEvent {
+  id          String            @id @default(uuid())
+  interviewId String
+  type        SecurityEventType
+  severity    SecuritySeverity  @default(LOW)
+  metadata    Json?
+  createdAt   DateTime          @default(now())
+  interview   Interview         @relation(fields: [interviewId], references: [id])
+
+  @@index([interviewId])
+  @@index([type])
+}
+
+enum SecurityEventType {
+  TAB_SWITCH
+  WINDOW_BLUR
+  WINDOW_MINIMIZE
+  FULLSCREEN_EXIT
+  COPY_PASTE
+  RIGHT_CLICK
+  MULTIPLE_MONITORS
+  DEVTOOLS_OPEN
+  NETWORK_DISCONNECT
+  LONG_INACTIVITY
+  MULTIPLE_FACES
+  VOICE_MISMATCH
+  RAPID_ANSWERING
+  SUSPICIOUS_TYPING
+}
+
+enum SecuritySeverity {
+  LOW
+  MEDIUM
+  HIGH
+  CRITICAL
 }
 
 model CandidateScore {
