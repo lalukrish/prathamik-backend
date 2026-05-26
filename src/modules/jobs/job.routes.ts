@@ -24,6 +24,6 @@ router.put(
 );
 router.delete("/:id", controller.delete.bind(controller));
 
-router.get("/jobs/:jobId/candidates", controller.getAppliedCandidates);
+router.get("/:jobId/candidates", controller.getAppliedCandidates);
 
 export default router;
