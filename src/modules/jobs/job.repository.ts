@@ -189,6 +189,15 @@ export class JobRepository {
     });
   }
 
+  async findBySlugPublic(slug: string) {
+    return prisma.job.findFirst({
+      where: {
+        slug: slug,
+        disabled: false,
+      },
+    });
+  }
+
   async update(id: string, data: any) {
     const job = await prisma.job.findFirst({
       where: {
