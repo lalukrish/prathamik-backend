@@ -21,11 +21,6 @@ export const getQuestionBanks =
             where: {
                 orgId,
             },
-
-            include: {
-                questions: true,
-            },
-
             orderBy: {
                 createdAt: "desc",
             },
