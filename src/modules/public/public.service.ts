@@ -8,6 +8,9 @@ import { uploadResumeToStorage }
 import { applicationQueue }
   from "../applications/application.queue";
 
+import { JobRepository } from "../jobs/job.repository";
+
+const jobRepo = new JobRepository();
 export class PublicService {
   async applyJob(
     jobId: string,
@@ -206,5 +209,9 @@ export class PublicService {
 
       application,
     };
+  }
+
+  async getJob(slug: string) {
+    return jobRepo.findBySlugPublic(slug);
   }
 }

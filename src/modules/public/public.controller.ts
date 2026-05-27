@@ -28,4 +28,16 @@ export class PublicController {
       });
     }
   }
+
+  async getJobPublicBySlug(req: Request<{ slug: string }>, res: Response) {
+    try {
+      const job = await publicService.getJob(req.params.slug);
+      res.json({ success: true, data: job });
+    } catch (error: any) {
+      res.status(500).json({
+        success: false,
+        message: error.message || "Failed to get job",
+      });
+    }
+  }
 }
