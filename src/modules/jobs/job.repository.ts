@@ -274,4 +274,17 @@ export class JobRepository {
       },
     });
   }
+
+  async getJobNameAndId(orgId: string) {
+    return prisma.job.findMany({
+      where: {
+        orgId,
+      },
+
+      select: {
+        id: true,
+        title: true,
+      },
+    });
+  }
 }

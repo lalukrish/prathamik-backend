@@ -122,4 +122,8 @@ export class JobService {
 
     return jobRepo.getAppliedCandidatesByJobId(jobId, skip, limit);
   }
+
+  async getJobNameAndId(orgId: string) {
+    return jobRepo.getJobNameAndId(orgId);
+  }
 }
