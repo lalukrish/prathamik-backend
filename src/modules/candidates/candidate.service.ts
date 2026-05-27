@@ -11,6 +11,14 @@ export const candidateService = {
     }
     return user;
   },
+  getApplicationById: async (id: string) => {
+    const user = await candidateRepository.findApplicationCandidate(id);
+
+    if (!user) {
+      throw new Error("Application");
+    }
+    return user;
+  },
 
   getAllCandidate: async (page: number, limit: number, isBlocked?: boolean) => {
     const skip = (page - 1) * limit;

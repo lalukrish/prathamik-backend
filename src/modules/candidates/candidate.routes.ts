@@ -10,6 +10,8 @@ import { applyJobSchema, updateCandidateProfileSchema } from "./candidate.type";
 const router = Router();
 const controller = new CandidateController();
 router.get("/:id", candidateController.getSingleCandidateById);
+router.get("/:id/application", candidateController.getApplicationOfCandidate);
+
 router.get("/", candidateController.getAllCandidate);
 router.post(
   "/candidate-apply/:jobId/:userId",
@@ -26,7 +28,7 @@ router.put(
 
   upload.single("resume"),
 
-     validate(updateCandidateProfileSchema),
+  validate(updateCandidateProfileSchema),
 
   candidateController.updateCandidateProfile,
 );
@@ -36,4 +38,5 @@ router.put(
 
   candidateController.softDeleteCandidate,
 );
+
 export default router;

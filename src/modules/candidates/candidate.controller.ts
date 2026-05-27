@@ -138,6 +138,29 @@ export class CandidateController {
       });
     }
   };
+  getApplicationOfCandidate = async (
+    req: Request<{ id: string }>,
+    res: Response,
+  ) => {
+    try {
+      const { id } = req.params;
+
+      if (!id) {
+        res.status(400).json({ error: "applicationId is required" });
+        return;
+      }
+      console.log("id>>", id);
+      const user = await candidateService.getApplicationById(id);
+
+      res.status(200).json({
+        success: true,
+        message: "Application details fetched successfully",
+        data: user,
+      });
+    } catch (err: any) {
+      res.status(404).json({ error: err.message });
+    }
+  };
 }
 
 export const candidateController = new CandidateController();
