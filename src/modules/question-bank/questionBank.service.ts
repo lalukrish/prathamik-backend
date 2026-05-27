@@ -1,10 +1,6 @@
 import * as repository from "./questionBank.repository";
-
 import { questionBankQueue } from "./questionBank.queue";
 
-// =====================================================
-// CREATE QUESTION BANK
-// =====================================================
 
 export const createQuestionBank =
     async (
@@ -12,34 +8,23 @@ export const createQuestionBank =
         userId: string,
         payload: any,
     ) => {
-        // =================================================
-        // CREATE BANK
-        // =================================================
 
         const bank =
             await repository.createQuestionBank(
                 {
                     orgId,
-
                     createdBy: userId,
-
                     title: payload.title,
-
                     description:
                         payload.description,
-
                     jobId: payload.jobId,
-
                     mode: payload.mode,
-
                     aiGenerated:
                         payload.mode === "AI",
                 },
             );
 
-        // =================================================
-        // AI MODE
-        // =================================================
+        // AI Genreate
 
         if (payload.mode === "AI") {
             if (!payload.config) {
@@ -48,35 +33,24 @@ export const createQuestionBank =
                 );
             }
 
-            // ===============================================
             // ADD TO QUEUE
-            // ===============================================
-
             await questionBankQueue.add(
                 "generate-questions",
-
                 {
                     questionBankId: bank.id,
-
                     config: payload.config,
                 },
-
                 {
                     attempts: 3,
-
                     backoff: {
                         type: "exponential",
-
                         delay: 5000,
                     },
-
                     removeOnComplete: 50,
-
                     removeOnFail: 20,
                 },
             );
         }
-
         return bank;
     };
 
@@ -85,9 +59,15 @@ export const createQuestionBank =
 // =====================================================
 
 export const getQuestionBanks =
-    async (orgId: string) => {
+    async (
+        orgId: string,
+        page: number = 1,
+        limit: number = 10,
+    ) => {
         return repository.getQuestionBanks(
             orgId,
+            page,
+            limit,
         );
     };
 
