@@ -16,15 +16,24 @@ export const createQuestionBank =
 // =====================================================
 
 export const getQuestionBanks =
-    async (orgId: string) => {
-        return prisma.questionBank.findMany({
+    async (orgId: string, page: number = 1, limit: number = 10) => {
+        const skip = (page - 1) * limit;
+        const data = await prisma.questionBank.findMany({
             where: {
                 orgId,
             },
             orderBy: {
                 createdAt: "desc",
             },
+            skip,
+            take: limit,
         });
+
+        return {
+            data,
+            page,
+            limit,
+        };
     };
 
 // =====================================================
