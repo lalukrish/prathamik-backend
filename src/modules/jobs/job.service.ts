@@ -110,8 +110,8 @@ export class JobService {
     };
   }
 
-  async getJob(id: string, orgId: string) {
-    return jobRepo.findById(id, orgId);
+  async getJob(slug: string, orgId: string) {
+    return jobRepo.findBySlug(slug, orgId);
   }
 
   async deleteJob(id: string, orgId: string | null) {
@@ -124,6 +124,7 @@ export class JobService {
   }
 
   async getJobNameAndId(orgId: string) {
-    return jobRepo.getJobNameAndId(orgId);
+    const jobs = await jobRepo.getJobNameAndId(orgId);
+    return jobs;
   }
 }
