@@ -31,6 +31,7 @@ export const getQuestionBanks = async (req: Request, res: Response) => {
     });
 };
 
+
 export const getQuestionBankById = async (req: Request, res: Response) => {
     const result = await service.getQuestionBankById(
         req.params.id,
