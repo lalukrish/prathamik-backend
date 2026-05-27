@@ -63,14 +63,14 @@ export class JobController {
     }
   }
 
-  async getOne(req: Request<{ id: string }>, res: Response) {
+  async getOne(req: Request<{ slug: string }>, res: Response) {
     try {
       const orgId = req.user?.orgId;
       if (!orgId) {
         throw new Error("Organization ID is required");
       }
 
-      const job = await jobService.getJob(req.params.id, orgId);
+      const job = await jobService.getJob(req.params.slug, orgId);
       console.log(job);
       res.json({ success: true, data: job });
     } catch (error) {
@@ -122,11 +122,13 @@ export class JobController {
   async getJobNameAndId(req: Request, res: Response) {
     try {
       const orgId = req.user?.orgId;
+      console.log("orgId", orgId)
       if (!orgId) {
         throw new Error("Organization ID is required");
       }
 
       const jobs = await jobService.getJobNameAndId(orgId);
+      console.log("hii", jobs)
       res.status(200).json({ success: true, data: jobs == null ? [] : jobs });
     } catch (error) {
       logger.error({ error: error, message: "Failed to get job name and id" });

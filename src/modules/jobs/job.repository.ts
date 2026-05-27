@@ -175,6 +175,20 @@ export class JobRepository {
     });
   }
 
+  async findBySlug(slug: string, orgId: string | null) {
+    // CHECK ORG ID
+    if (!orgId) {
+      throw new Error("Organization ID missing");
+    }
+
+    return prisma.job.findFirst({
+      where: {
+        slug: slug,
+        orgId,
+      },
+    });
+  }
+
   async update(id: string, data: any) {
     const job = await prisma.job.findFirst({
       where: {
@@ -276,9 +290,13 @@ export class JobRepository {
   }
 
   async getJobNameAndId(orgId: string) {
+    if (!orgId) {
+      throw new Error("Organization ID missing");
+    }
     return prisma.job.findMany({
       where: {
         orgId,
+        disabled: false,
       },
 
       select: {

@@ -16,7 +16,8 @@ router.post(
   controller.create.bind(controller),
 );
 router.get("/", controller.getAll.bind(controller));
-router.get("/:id", controller.getOne.bind(controller));
+router.get("/jobs-dropdown", controller.getJobNameAndId);
+router.get("/slug/:slug", controller.getOne.bind(controller));
 router.put(
   "/:id",
   validate(updateJobSchema),
@@ -26,6 +27,6 @@ router.delete("/:id", controller.delete.bind(controller));
 
 router.get("/:jobId/candidates", controller.getAppliedCandidates);
 
-router.get("/jobs-dropdown", controller.getJobNameAndId);
+
 
 export default router;
