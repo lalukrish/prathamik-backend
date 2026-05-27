@@ -92,29 +92,29 @@ model Session {
 }
 
 model Job {
-  id             String                 @id @default(uuid())
-  title          String
-  slug           String                 @unique
-  description    String
-  requiredSkills String[]
-  niceToHave     String[]
-  experienceMin  Int?
-  experienceMax  Int?
-  embedding      Unsupported("vector")?
-  orgId          String
-  createdBy      String
-  createdAt      DateTime               @default(now()) @db.Timestamptz(6)
-  updatedAt      DateTime               @updatedAt @db.Timestamptz(6)
-  updatedBy      String?
-  jdHtml         String?
-  lastDate       DateTime?
-  location       String?
-  workMode       String?
-  disabled       Boolean                @default(false)
-  applications   Application[]
-  creator        User                   @relation("JobCreatedBy", fields: [createdBy], references: [id])
-  organization   Organization           @relation(fields: [orgId], references: [id])
-  updater        User?                  @relation("JobUpdatedBy", fields: [updatedBy], references: [id])
+  id                 String                 @id @default(uuid())
+  title              String
+  slug               String                 @unique
+  description        String
+  requiredSkills     String[]
+  niceToHave         String[]
+  experienceMin      Int?
+  experienceMax      Int?
+  embedding          Unsupported("vector")?
+  orgId              String
+  createdBy          String
+  createdAt          DateTime               @default(now()) @db.Timestamptz(6)
+  updatedAt          DateTime               @updatedAt @db.Timestamptz(6)
+  updatedBy          String?
+  jdHtml             String?
+  lastDate           DateTime?
+  location           String?
+  workMode           String?
+  disabled           Boolean                @default(false)
+  applications       Application[]
+  creator            User                   @relation("JobCreatedBy", fields: [createdBy], references: [id])
+  organization       Organization           @relation(fields: [orgId], references: [id])
+  updater            User?                  @relation("JobUpdatedBy", fields: [updatedBy], references: [id])
   questionBanks      QuestionBank[]
   interviewTemplates InterviewTemplate[]
 }
@@ -305,24 +305,40 @@ model Interview {
 }
 
 model InterviewQuestion {
-  id               String            @id @default(uuid())
-  interviewId      String
-  questionBankId   String?
-  question         String
-  type             QuestionType
-  difficulty       DifficultyLevel?
-  skillTags        String[]
-  options          Json?
-  correctAnswer    Json?
-  expectedAnswer   String?
-  audioUrl         String?
-  aiGenerated      Boolean           @default(false)
-  order            Int
-  maxScore         Int               @default(10)
-  createdAt        DateTime          @default(now())
-  interview        Interview         @relation(fields: [interviewId], references: [id])
-  questionBank     QuestionBank?     @relation(fields: [questionBankId], references: [id])
-  answers          InterviewAnswer[]
+  id String @id @default(uuid())
+
+  interviewId String
+
+  questionId String?
+
+  question String
+
+  type QuestionType
+
+  difficulty DifficultyLevel?
+
+  skillTags String[]
+
+  options Json?
+
+  correctAnswer Json?
+
+  audioUrl String?
+
+  aiGenerated Boolean @default(false)
+
+  order Int
+
+  maxScore Int @default(10)
+
+  createdAt DateTime @default(now())
+
+  interview Interview @relation(fields: [interviewId], references: [id])
+
+  questionRef Question? @relation(fields: [questionId], references: [id])
+
+  answers InterviewAnswer[]
+
   timeLimitSeconds Int?
 
   @@index([interviewId])
@@ -349,30 +365,77 @@ model InterviewAnswer {
 }
 
 model QuestionBank {
-  id                 String                      @id @default(uuid())
-  orgId              String
-  jobId              String?
-  title              String?
-  question           String
-  type               QuestionType
-  difficulty         DifficultyLevel
-  skillTags          String[]
-  options            Json?
-  correctAnswer      Json?
-  expectedAnswer     String?
-  audioUrl           String?
-  aiGenerated        Boolean                     @default(false)
-  createdBy          String?
-  isActive           Boolean                     @default(true)
-  createdAt          DateTime                    @default(now())
-  organization       Organization                @relation(fields: [orgId], references: [id])
-  job                Job?                        @relation(fields: [jobId], references: [id])
-  version            Int                         @default(1)
-  templateQuestions  InterviewTemplateQuestion[]
+  id String @id @default(uuid())
+
+  orgId String
+
+  jobId String?
+
+  title String
+
+  description String?
+
+  mode QuestionBankMode?
+
+  aiGenerated Boolean @default(false)
+
+  totalQuestions Int @default(0)
+
+  createdBy String?
+
+  isActive Boolean @default(true)
+
+  createdAt DateTime @default(now())
+
+  // =====================================================
+  // Relations
+  // =====================================================
+
+  organization Organization @relation(fields: [orgId], references: [id])
+
+  job Job? @relation(fields: [jobId], references: [id])
+
+  questions Question[]
+
+  @@index([orgId])
+  @@index([jobId])
+}
+
+model Question {
+  id              String @id @default(uuid())
+
+  questionBankId  String
+
+  question        String
+
+  type            QuestionType
+
+  difficulty      DifficultyLevel
+
+  weight          Int @default(10)
+
+  skillTags       String[]
+
+  options         Json?
+
+  audioUrl        String?
+
+  aiGenerated     Boolean @default(false)
+
+  createdAt       DateTime @default(now())
+
+  questionBank    QuestionBank @relation(fields: [questionBankId], references: [id])
+
+  templateQuestions InterviewTemplateQuestion[]
+
   interviewQuestions InterviewQuestion[]
 
-  @@index([jobId])
-  @@index([orgId])
+  @@index([questionBankId])
+}
+
+enum QuestionBankMode {
+  MANUAL
+  AI
 }
 
 model InterviewTemplate {
@@ -393,17 +456,17 @@ model InterviewTemplate {
 }
 
 model InterviewTemplateQuestion {
-  id             String            @id @default(uuid())
-  templateId     String
-  questionBankId String
-  order          Int
-  weight         Int               @default(10)
-  isRequired     Boolean           @default(true)
-  template       InterviewTemplate @relation(fields: [templateId], references: [id])
-  question       QuestionBank      @relation(fields: [questionBankId], references: [id])
+  id         String            @id @default(uuid())
+  questionId String
+  templateId String
+  order      Int
+  weight     Int               @default(10)
+  isRequired Boolean           @default(true)
+  template   InterviewTemplate @relation(fields: [templateId], references: [id])
+  question   Question          @relation(fields: [questionId], references: [id])
 
   @@index([templateId])
-  @@index([questionBankId])
+  @@index([questionId])
 }
 
 enum QuestionType {
