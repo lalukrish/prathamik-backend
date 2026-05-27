@@ -13,7 +13,11 @@
     "create-admin": "ts-node scripts/create-admin.ts",
     "prisma:generate": "prisma generate",
     "prisma:migrate": "prisma migrate deploy",
-    "worker": "ts-node-dev src/worker.ts"
+    "worker": "ts-node-dev src/worker.ts",
+    "seed": "prisma db seed"
+  },
+  "prisma": {
+    "seed": "ts-node prisma/seed.ts"
   },
   "repository": {
     "type": "git",
@@ -27,6 +31,7 @@
   },
   "homepage": "https://github.com/icg-expert/hire-ai-backend#readme",
   "dependencies": {
+    "@faker-js/faker": "^10.4.0",
     "@prisma/client": "^5.22.0",
     "@supabase/supabase-js": "^2.105.3",
     "axios": "^1.16.1",

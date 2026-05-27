@@ -7,6 +7,8 @@ import publicRoutes from "../modules/public/public.routes";
 import candidateRoutes from "../modules/candidates/candidate.routes";
 import { authMiddleware } from "../middlewares/auth.middleware";
 import AdminRoutes from "../modules/admin/admin.routes";
+import questionBankRoutes from "../modules/question-bank/questionBank.routes";
+
 const router = Router();
 const controller = new JobController();
 
@@ -16,6 +18,7 @@ router.use("/auth", authRoutes);
 router.use("/user", authMiddleware, userRoutes);
 router.use("/candidate", authMiddleware, candidateRoutes);
 router.use("/admin", authMiddleware, AdminRoutes);
+router.use("/question-bank", questionBankRoutes);
 
 // public routes
 
