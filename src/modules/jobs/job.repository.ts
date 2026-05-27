@@ -219,12 +219,10 @@ export class JobRepository {
   }
 
   async delete(id: string, orgId: string | null) {
-    // CHECK ORG ID
     if (!orgId) {
       throw new Error("Organization ID missing");
     }
 
-    // CHECK JOB EXISTS
     const job = await prisma.job.findFirst({
       where: {
         slug: id,
@@ -246,8 +244,6 @@ export class JobRepository {
     });
   }
 
-  // GET APPLIED CANDIDATES FOR PARTICULAR JOB
-
   async getAppliedCandidatesByJobId(
     jobId: string,
     skip: number,
@@ -260,10 +256,10 @@ export class JobRepository {
 
       select: {
         id: true,
-        status: true,
-        overallScore: true,
-        matchedSkills: true,
-        missingSkills: true,
+        // status: true,
+        // overallScore: true,
+        // matchedSkills: true,
+        // missingSkills: true,
         createdAt: true,
 
         candidate: {
@@ -274,19 +270,19 @@ export class JobRepository {
             phone: true,
             currentRole: true,
             totalExperience: true,
-            skills: true,
-            linkedinUrl: true,
-            createdAt: true,
+            // skills: true,
+            // linkedinUrl: true,
+            // createdAt: true,
           },
         },
 
-        resume: {
-          select: {
-            id: true,
-            resumeUrl: true,
-            fileName: true,
-          },
-        },
+        // resume: {
+        //   select: {
+        //     id: true,
+        //     resumeUrl: true,
+        //     fileName: true,
+        //   },
+        // },
       },
 
       skip,

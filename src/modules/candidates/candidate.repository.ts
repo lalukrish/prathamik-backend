@@ -17,6 +17,22 @@ export const candidateRepository = {
     });
   },
 
+  findApplicationCandidate: async (id: string) => {
+    return prisma.application.findUnique({
+      where: { id },
+      include: {
+        candidate: true,
+
+        // applications: {
+        //   include: {
+        //     job: true,
+        //     scores: true,
+        //   },
+        // },
+      },
+    });
+  },
+
   getCandidateHistory: async (id: string) => {
     return prisma.candidate.findFirst({
       where: {
