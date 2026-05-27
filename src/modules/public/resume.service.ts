@@ -5,11 +5,8 @@ export const uploadResumeToStorage = async (
   candidateId: string,
 ) => {
   const fileExt = file.originalname.split(".").pop();
-
   const fileName = `${Date.now()}.${fileExt}`;
-
   const filePath = `${candidateId}/${fileName}`;
-
   const { data, error } = await supabase.storage
     .from("i-bucket")
     .upload(filePath, file.buffer, {
