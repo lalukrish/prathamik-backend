@@ -16,21 +16,46 @@ export const createQuestionBank =
 // =====================================================
 
 export const getQuestionBanks =
-    async (orgId: string, page: number = 1, limit: number = 10) => {
+    async (
+        orgId: string,
+        page: number = 1,
+        limit: number = 10,
+        search?: string,
+    ) => {
         const skip = (page - 1) * limit;
-        const data = await prisma.questionBank.findMany({
-            where: {
-                orgId,
-            },
-            orderBy: {
-                createdAt: "desc",
-            },
-            skip,
-            take: limit,
-        });
+        const where = {
+            orgId,
+            ...(search && {
+                name: {
+                    contains: search,
+                    mode: "insensitive" as const,
+                },
+            }),
+        };
+
+        const [data, total, totalWithoutFilter] = await Promise.all([
+            prisma.questionBank.findMany({
+                where,
+                orderBy: {
+                    createdAt: "desc",
+                },
+                skip,
+                take: limit,
+            }),
+            prisma.questionBank.count({
+                where,
+            }),
+            prisma.questionBank.count({
+                where: { orgId },
+            }),
+        ]);
+
+        const totalPages = Math.ceil(total / limit);
 
         return {
             data,
+            total,
+            totalPages,
             page,
             limit,
         };

@@ -63,11 +63,13 @@ export const getQuestionBanks =
         orgId: string,
         page: number = 1,
         limit: number = 10,
+        search: string
     ) => {
         return repository.getQuestionBanks(
             orgId,
             page,
             limit,
+            search
         );
     };
 

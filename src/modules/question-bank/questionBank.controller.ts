@@ -17,8 +17,14 @@ export const createQuestionBank = async (req: Request, res: Response) => {
 export const getQuestionBanks = async (req: Request, res: Response) => {
   const page = parseInt(req.query.page as string, 10) || 1;
   const limit = parseInt(req.query.limit as string, 10) || 10;
+  const search = (req.query.search as string) || "";
 
-  const result = await service.getQuestionBanks(req.user.orgId, page, limit);
+  const result = await service.getQuestionBanks(
+    req.user.orgId,
+    page,
+    limit,
+    search,
+  );
 
   return res.status(200).json({
     success: true,
