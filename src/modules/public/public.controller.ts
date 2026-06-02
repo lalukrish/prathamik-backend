@@ -10,11 +10,13 @@ export class PublicController {
     res: Response,
   ) {
     try {
+      console.log("dummy", req.body, req.file, req.params.jobId);
       const result = await publicService.applyJob(
         req.params.jobId,
         req.body,
         req.file,
       );
+      console.log("first", result);
 
       return res.status(201).json({
         success: true,
@@ -31,6 +33,7 @@ export class PublicController {
 
   async getJobPublicBySlug(req: Request<{ slug: string }>, res: Response) {
     try {
+      console.log("first");
       const job = await publicService.getJob(req.params.slug);
       res.json({ success: true, data: job });
     } catch (error: any) {

@@ -10,7 +10,7 @@ router.post(
 
   upload.single("resume"),
 
-  validate(applyJobSchema),
+  // validate(applyJobSchema),
 
   controller.applyJob,
 );
