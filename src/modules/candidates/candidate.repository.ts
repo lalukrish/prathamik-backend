@@ -22,7 +22,7 @@ export const candidateRepository = {
       where: { id },
       include: {
         candidate: true,
-
+        //try
         // applications: {
         //   include: {
         //     job: true,

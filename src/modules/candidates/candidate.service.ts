@@ -13,7 +13,7 @@ export const candidateService = {
   },
   getApplicationById: async (id: string) => {
     const user = await candidateRepository.findApplicationCandidate(id);
-
+    //test
     if (!user) {
       throw new Error("Application");
     }
