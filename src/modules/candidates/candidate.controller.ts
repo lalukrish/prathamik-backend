@@ -146,7 +146,7 @@ export class CandidateController {
       const { id } = req.params;
 
       if (!id) {
-        res.status(400).json({ error: "applicationId is required" });
+        res.status(400).json({ error: "applicationId is required." });
         return;
       }
       console.log("id>>", id);
