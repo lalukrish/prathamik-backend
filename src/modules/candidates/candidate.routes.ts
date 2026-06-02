@@ -7,6 +7,8 @@ import { upload } from "../../middlewares/upload.middleware";
 import { validate } from "../../middlewares/validation.middleware";
 import { applyJobSchema, updateCandidateProfileSchema } from "./candidate.type";
 
+//added new apis
+
 const router = Router();
 const controller = new CandidateController();
 router.get("/:id", candidateController.getSingleCandidateById);
