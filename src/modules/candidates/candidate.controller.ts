@@ -154,7 +154,7 @@ export class CandidateController {
 
       res.status(200).json({
         success: true,
-        message: "Application details fetched successfully",
+        message: "Application details fetched successfully.",
         data: user,
       });
     } catch (err: any) {
