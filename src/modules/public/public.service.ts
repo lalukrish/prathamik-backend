@@ -98,20 +98,26 @@ export class PublicService {
                 : null,
 
             expectedSalary:
-              payload.expectedSalary ||
-              null,
+              payload.expectedSalary
+                ? parseFloat(
+                  payload.expectedSalary,
+                )
+                : null,
 
             currentCTC:
               payload.currentCTC ||
               null,
 
             noticePeriod:
-              payload.noticePeriod ||
-              null,
+              payload.noticePeriod
+                ? parseFloat(
+                  payload.noticePeriod,
+                )
+                : null,
 
             isOnNoticePeriod:
-              payload.isOnNoticePeriod ||
-              false,
+              payload.isOnNoticePeriod === "true" ||
+              payload.isOnNoticePeriod === true,
 
             orgId: job.orgId,
           },
