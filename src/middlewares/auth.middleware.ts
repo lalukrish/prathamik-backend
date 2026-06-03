@@ -52,8 +52,6 @@ export const authMiddleware = async (
     },
   });
 
-  console.log(a);
-
   req.user = result.decoded!;
   next();
 };

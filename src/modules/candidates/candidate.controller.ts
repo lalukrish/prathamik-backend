@@ -149,7 +149,6 @@ export class CandidateController {
         res.status(400).json({ error: "applicationId is required." });
         return;
       }
-      console.log("id>>", id);
       const user = await candidateService.getApplicationById(id);
 
       res.status(200).json({
@@ -161,6 +160,8 @@ export class CandidateController {
       res.status(404).json({ error: err.message });
     }
   };
+
+
 }
 
 export const candidateController = new CandidateController();

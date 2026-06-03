@@ -182,3 +182,7 @@ export const deleteQuestion =
             questionId,
         );
     };
+
+export const getQuestionBankByJobId = async (orgId: string, jobId: string) => {
+    return repository.getQuestionBankByJobId(orgId, jobId);
+};

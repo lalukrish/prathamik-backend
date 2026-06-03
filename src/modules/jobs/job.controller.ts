@@ -104,8 +104,11 @@ export class JobController {
 
       const page = Number(req.query.page) || 1;
       const limit = Number(req.query.limit) || 10;
-
-      const data = await jobService.getAppliedCandidates(jobId, page, limit);
+      const orgId = req.user?.orgId;
+      if (!orgId) {
+        throw new Error("Organization ID is required");
+      }
+      const data = await jobService.getAppliedCandidates(jobId, page, limit, orgId);
 
       res.status(200).json({
         success: true,
@@ -122,13 +125,11 @@ export class JobController {
   async getJobNameAndId(req: Request, res: Response) {
     try {
       const orgId = req.user?.orgId;
-      console.log("orgId", orgId)
       if (!orgId) {
         throw new Error("Organization ID is required");
       }
 
       const jobs = await jobService.getJobNameAndId(orgId);
-      console.log("hii", jobs)
       res.status(200).json({ success: true, data: jobs == null ? [] : jobs });
     } catch (error) {
       logger.error({ error: error, message: "Failed to get job name and id" });

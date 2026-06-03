@@ -159,4 +159,5 @@ export const candidateService = {
     );
     return candidate;
   },
+
 };

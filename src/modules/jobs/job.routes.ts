@@ -9,7 +9,6 @@ const controller = new JobController();
 router.post(
   "/",
   (req, res, next) => {
-    console.log("CREATE JOB ROUTE HIT");
     next();
   },
   //  validate(createJobSchema),

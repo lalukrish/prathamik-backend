@@ -214,3 +214,18 @@ export const updateTotalQuestions =
             },
         });
     };
+
+
+export const getQuestionBankByJobId = async (orgId: string, jobId: string) => {
+    return prisma.questionBank.findMany({
+        where: {
+            orgId,
+            jobId,
+            isActive: true,
+        },
+        select: {
+            id: true,
+            title: true,
+        },
+    });
+};

@@ -71,10 +71,6 @@ new Worker(
         await repository.updateTotalQuestions(
             questionBankId,
         );
-
-        console.log(
-            `AI Questions Generated: ${questionBankId}`,
-        );
     },
 
     {

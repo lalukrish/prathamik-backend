@@ -24,7 +24,6 @@ export class UserController {
   };
   createUser = async (req: Request, res: Response) => {
     try {
-      console.log("REQ BODY =>", req.body);
       const user = await userService.createUser(req.body);
       logger.info({
         data: req.body,

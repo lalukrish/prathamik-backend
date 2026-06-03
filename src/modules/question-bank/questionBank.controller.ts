@@ -86,3 +86,17 @@ export const deleteQuestion = async (req: Request, res: Response) => {
     data: result,
   });
 };
+
+export const getQuestionBankByJobId = async (req: Request, res: Response) => {
+  const orgId = req.user.orgId;
+  const jobId = req.params.jobId;
+
+  if (!orgId || !jobId) {
+    throw new Error("Invalid request");
+  }
+  const result = await service.getQuestionBankByJobId(orgId, jobId);
+  return res.status(200).json({
+    success: true,
+    data: result,
+  });
+};

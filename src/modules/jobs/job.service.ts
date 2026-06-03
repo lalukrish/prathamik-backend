@@ -14,7 +14,6 @@ export class JobService {
 
     const description = extractTextFromHTML(cleanHtml);
     const slug = await generateUniqueSlug(data.title);
-    console.log("data: job data", data);
 
     const job = await jobRepo.create({
       title: data.title,
@@ -105,7 +104,7 @@ export class JobService {
         total: total.totalCount,
         page,
         limit,
-        totalPages: Math.ceil(total.totalCount / limit),
+        totalPages: Math.ceil(total.totalCount / limit)
       },
     };
   }
@@ -117,14 +116,15 @@ export class JobService {
   async deleteJob(id: string, orgId: string | null) {
     return jobRepo.delete(id, orgId);
   }
-  async getAppliedCandidates(jobId: string, page: number, limit: number) {
+  async getAppliedCandidates(jobId: string, page: number, limit: number, orgId: string) {
     const skip = (page - 1) * limit;
 
-    return jobRepo.getAppliedCandidatesByJobId(jobId, skip, limit);
+    return jobRepo.getAppliedCandidatesByJobId(jobId, skip, limit, orgId);
   }
 
   async getJobNameAndId(orgId: string) {
     const jobs = await jobRepo.getJobNameAndId(orgId);
     return jobs;
   }
+
 }

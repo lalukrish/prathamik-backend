@@ -138,7 +138,6 @@ export class PublicService {
           file,
           candidate.id,
         );
-      console.log("uploadedResume", uploadedResume);
       const resume = await prisma.resume.create({
         data: {
           candidateId: candidate.id,

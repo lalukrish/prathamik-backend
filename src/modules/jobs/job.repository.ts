@@ -1,65 +1,3 @@
-// import { prisma } from "../../config/db";
-
-// export class JobRepository {
-//   async create(data: any) {
-//     return prisma.job.create({
-//       data,
-//     });
-//   }
-
-//   async findAll(
-//     orgId: string | null,
-//     skip: number,
-//     limit: number,
-//     search: string,
-//   ) {
-//     return prisma.job.findMany({
-//       where: {
-//         orgId,
-//         ...(search && {
-//           title: { contains: search, mode: "insensitive" },
-//         }),
-//       },
-//       orderBy: { createdAt: "desc" },
-//       include: {
-//         creator: { select: { id: true, name: true } },
-//         updater: { select: { id: true, name: true } },
-//       },
-//       skip,
-//       take: limit,
-//     });
-//   }
-
-//   async count(orgId: string | null, search: string) {
-//     return prisma.job.count({
-//       where: {
-//         orgId,
-//         ...(search && {
-//           title: { contains: search, mode: "insensitive" },
-//         }),
-//       },
-//     });
-//   }
-//   async findById(id: string, orgId: string | null) {
-//     return prisma.job.findUnique({
-//       where: { id, orgId },
-//     });
-//   }
-
-//   async update(id: string, data: any) {
-//     return prisma.job.update({
-//       where: { id },
-//       data,
-//     });
-//   }
-
-//   async delete(id: string, orgId: string | null) {
-//     return prisma.job.delete({
-//       where: { id, orgId },
-//     });
-//   }
-// }
-
 import { prisma } from "../../config/db";
 
 export class JobRepository {
@@ -75,7 +13,6 @@ export class JobRepository {
     limit: number,
     search: string,
   ) {
-    // CHECK ORG ID
     if (!orgId) {
       throw new Error("Organization ID missing");
     }
@@ -83,7 +20,6 @@ export class JobRepository {
     return prisma.job.findMany({
       where: {
         orgId,
-
         ...(search && {
           title: {
             contains: search,
@@ -91,27 +27,26 @@ export class JobRepository {
           },
         }),
       },
-
       orderBy: {
         createdAt: "desc",
       },
-
-      include: {
+      select: {
+        id: true,
+        title: true,
+        disabled: true,
+        createdAt: true,
         creator: {
           select: {
             id: true,
             name: true,
           },
         },
-
-        updater: {
+        _count: {
           select: {
-            id: true,
-            name: true,
+            applications: true,
           },
         },
       },
-
       skip,
       take: limit,
     });
@@ -248,18 +183,19 @@ export class JobRepository {
     jobId: string,
     skip: number,
     limit: number,
+    orgId: string,
   ) {
     return prisma.application.findMany({
       where: {
+        candidate: {
+          orgId
+        },
         jobId,
       },
 
       select: {
         id: true,
-        // status: true,
-        // overallScore: true,
-        // matchedSkills: true,
-        // missingSkills: true,
+        status: true,
         createdAt: true,
 
         candidate: {
@@ -270,19 +206,9 @@ export class JobRepository {
             phone: true,
             currentRole: true,
             totalExperience: true,
-            // skills: true,
-            // linkedinUrl: true,
-            // createdAt: true,
           },
         },
 
-        // resume: {
-        //   select: {
-        //     id: true,
-        //     resumeUrl: true,
-        //     fileName: true,
-        //   },
-        // },
       },
 
       skip,
@@ -307,6 +233,19 @@ export class JobRepository {
       select: {
         id: true,
         title: true,
+      },
+    });
+  }
+
+  async countApplicationsByJobId(orgId: string) {
+    if (!orgId) {
+      throw new Error("Organization ID missing");
+    }
+    return prisma.application.count({
+      where: {
+        candidate: {
+          orgId
+        },
       },
     });
   }
