@@ -416,6 +416,8 @@ model Question {
 
   skillTags       String[]
 
+  timeLimitSeconds Int @default(60)
+
   options         Json?
 
   audioUrl        String?
