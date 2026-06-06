@@ -160,4 +160,13 @@ export const candidateService = {
     return candidate;
   },
 
+
+  getCandidateParsedData: async (id: string, orgId: string) => {
+    const application = await candidateRepository.getCandidateParsedData(id, orgId);
+    if (!application) {
+      throw new Error("Application not found");
+    }
+    return application;
+  },
+
 };

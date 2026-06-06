@@ -1,9 +1,9 @@
+import { InterviewActivity } from './../../../node_modules/.prisma/client/index.d';
+import { includes } from "zod";
 import { prisma } from "../../config/db";
-import { InterviewStatus } from "@prisma/client";
+import { InterviewAction, InterviewStatus } from "@prisma/client";
 
-export const findApplicationById = async (
-    applicationId: string
-) => {
+export const findApplicationById = async (applicationId: string) => {
     return prisma.application.findUnique({
         where: {
             id: applicationId,
@@ -11,42 +11,74 @@ export const findApplicationById = async (
         include: {
             candidate: true,
             job: true,
-            interview: true,
+            interviews: {
+                orderBy: {
+                    createdAt: "desc",
+                },
+            },
         },
     });
 };
 
-export const findQuestionBankById =
-    async (questionBankId: string) => {
-        return prisma.questionBank.findUnique({
-            where: {
-                id: questionBankId,
-            },
-            include: {
-                questions: true,
-            },
-        });
-    };
+export const findInterviewByIdRaw = async (interviewId: string) => {
+    return prisma.interview.findUnique({
+        where: {
+            id: interviewId,
+        },
 
-export const createInterview = async (
-    data: any
-) => {
+        include: {
+            questions: {
+                orderBy: {
+                    order: "asc",
+                },
+            },
+        },
+    });
+};
+
+export const createActivity = async (data: {
+    interviewId: string;
+    action: InterviewAction;
+    userId?: string;
+    candidateId?: string;
+    metadata?: any;
+}) => {
+    return prisma.interviewActivity.create({
+        data: {
+            interviewId: data.interviewId,
+            action: data.action,
+            userId: data.userId,
+            candidateId: data.candidateId,
+            metadata: data.metadata,
+        },
+    });
+};
+
+
+export const findQuestionBankById = async (questionBankId: string) => {
+    return prisma.questionBank.findUnique({
+        where: {
+            id: questionBankId,
+        },
+        include: {
+            questions: true,
+        },
+    });
+};
+
+export const createInterview = async (data: any) => {
     return prisma.interview.create({
         data,
     });
 };
 
-export const createInterviewQuestions = async (
-    questions: any[]
-) => {
+export const createInterviewQuestions = async (questions: any[]) => {
     return prisma.interviewQuestion.createMany({
         data: questions,
     });
 };
 
-export const updateApplicationStatus = async (
-    applicationId: string
-) => {
+export const updateApplicationStatus = async (applicationId: string) => {
     return prisma.application.update({
         where: {
             id: applicationId,
@@ -127,10 +159,7 @@ export const countInterviews = async ({
     });
 };
 
-export const findInterviewById = async (
-    id: string,
-    orgId: string
-) => {
+export const findInterviewById = async (id: string, orgId: string) => {
     return prisma.interview.findFirst({
         where: {
             id,
@@ -160,26 +189,132 @@ export const findInterviewById = async (
     });
 };
 
-export const findInterviewByToken =
-    async (token: string) => {
-        return prisma.interview.findUnique({
-            where: {
-                accessToken: token,
+export const findInterviewByToken = async (token: string) => {
+    return prisma.interview.findUnique({
+        where: {
+            accessToken: token,
+        },
+
+        include: {
+            application: {
+                include: {
+                    candidate: true,
+                    job: true,
+                },
             },
 
-            include: {
-                application: {
-                    include: {
-                        candidate: true,
-                        job: true,
-                    },
+            questions: {
+                orderBy: {
+                    order: "asc",
+                },
+            },
+        },
+    });
+};
+
+export const cancelInterview = async (interviewId: string, data: any) => {
+    return prisma.interview.update({
+        where: {
+            id: interviewId,
+        },
+        data: {
+            status: "CANCELLED",
+            ...data,
+        },
+    });
+};
+
+
+export const findExpiredInterviews =
+    async () => {
+        return prisma.interview.findMany({
+            where: {
+                status: {
+                    in: [
+                        "SCHEDULED",
+                        "IN_PROGRESS",
+                    ],
                 },
 
-                questions: {
-                    orderBy: {
-                        order: "asc",
-                    },
+                expiresAt: {
+                    lt: new Date(),
                 },
             },
         });
     };
+
+export const expireInterview =
+    async (id: string) => {
+        return prisma.interview.update({
+            where: {
+                id,
+            },
+            data: {
+                status: "EXPIRED",
+                submittedBySystem: true,
+            },
+        });
+    };
+
+export const findInterviewsByApplicationId = async (applicationId: string, orgId: string) => {
+    return prisma.interview.findMany({
+        where: {
+            applicationId,
+            application: {
+                job: {
+                    orgId,
+                },
+            },
+        },
+        select: {
+            id: true,
+            scheduledStartAt: true,
+            activities: {
+                include: {
+                    user: {
+                        select: {
+                            name: true,
+                        },
+                    },
+                    candidate: {
+                        select: {
+                            name: true,
+                        },
+                    },
+                },
+                orderBy: {
+                    createdAt: "desc"
+                }
+            },
+        },
+
+        orderBy: {
+            createdAt: "desc"
+        }
+    });
+};
+
+export const findInterviewActivitiesByInterviewIds = async (interviewIds: string[]) => {
+    return prisma.interviewActivity.findMany({
+        where: {
+            interviewId: {
+                in: interviewIds,
+            },
+        },
+        include: {
+            user: {
+                select: {
+                    name: true,
+                },
+            },
+            candidate: {
+                select: {
+                    name: true,
+                },
+            },
+        },
+        orderBy: {
+            createdAt: "desc",
+        },
+    });
+};

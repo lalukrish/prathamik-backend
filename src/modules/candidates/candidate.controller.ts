@@ -138,6 +138,7 @@ export class CandidateController {
       });
     }
   };
+
   getApplicationOfCandidate = async (
     req: Request<{ id: string }>,
     res: Response,
@@ -161,7 +162,29 @@ export class CandidateController {
     }
   };
 
+  getCandidateParsedData = async (req: Request<{ id: string }>, res: Response,) => {
+    try {
+      const { id } = req.params;
+      const orgId = req.user.orgId;
+      if (!orgId) {
+        res.status(400).json({ error: "orgId is required." });
+        return;
+      }
+      if (!id) {
+        res.status(400).json({ error: "applicationId is required." });
+        return;
+      }
+      const user = await candidateService.getCandidateParsedData(id, orgId);
 
+      res.status(200).json({
+        success: true,
+        message: "Application details fetched successfully.",
+        data: user,
+      });
+    } catch (err: any) {
+      res.status(404).json({ error: err.message });
+    }
+  };
 }
 
 export const candidateController = new CandidateController();

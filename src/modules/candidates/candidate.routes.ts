@@ -12,5 +12,6 @@ router.get("/", candidateController.getAllCandidate);
 router.post("/candidate-apply/:jobId/:userId", upload.single("resume"), validate(applyJobSchema), candidateController.candidateApply,);
 router.put("/update-profile/:userId", upload.single("resume"), validate(updateCandidateProfileSchema), candidateController.updateCandidateProfile,);
 router.put("/delete-candidate/:id", candidateController.softDeleteCandidate,);
+router.get("/:id/parsed-data", candidateController.getCandidateParsedData,);
 
 export default router;

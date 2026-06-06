@@ -20,15 +20,50 @@ export const candidateRepository = {
   findApplicationCandidate: async (id: string) => {
     return prisma.application.findUnique({
       where: { id },
-      include: {
-        candidate: true,
-        //try
-        // applications: {
-        //   include: {
-        //     job: true,
-        //     scores: true,
-        //   },
-        // },
+      select: {
+        id: true,
+        jobId: true,
+        status: true,
+        overallScore: true,
+        createdAt: true,
+
+        candidate: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+            phone: true,
+            currentRole: true,
+            totalExperience: true,
+            skills: true,
+            expectedSalary: true,
+            currentCTC: true,
+            noticePeriod: true,
+            isOnNoticePeriod: true,
+            linkedinUrl: true,
+            parsedData: true,
+          },
+        },
+
+        interviews: {
+          select: {
+            id: true,
+            status: true,
+            scheduledStartAt: true,
+          },
+          orderBy: {
+            createdAt: "desc",
+          },
+          take: 1,
+        },
+        scores: {
+          select: {
+            resumeScore: true,
+            interviewScore: true,
+            cheatScore: true,
+            overallScore: true,
+          },
+        },
       },
     });
   },
@@ -38,10 +73,8 @@ export const candidateRepository = {
       where: {
         id,
       },
-
       include: {
         resumes: true,
-
         applications: {
           include: {
             job: true,
@@ -73,7 +106,6 @@ export const candidateRepository = {
             resumeId: true,
             job: true,
             matchedSkills: true,
-            interview: true,
             missingSkills: true,
             overallScore: true,
             scores: true,
@@ -306,5 +338,39 @@ export const candidateRepository = {
     });
   },
 
+  getCandidateParsedData: async (id: string, orgId: string) => {
+    return prisma.application.findFirst({
+      where: {
+        id,
+        candidate: {
+          orgId,
+        },
+      },
+      select: {
+        id: true,
+        status: true,
+        overallScore: true,
+        matchedSkills: true,
+        missingSkills: true,
+        createdAt: true,
+        aiSummary: true,
+        parsedData: true,
+
+        candidate: {
+          select: {
+            orgId: true,
+          },
+        },
+
+        resume: {
+          select: {
+            id: true,
+            resumeUrl: true,
+            fileName: true,
+          },
+        },
+      },
+    });
+  },
 
 };

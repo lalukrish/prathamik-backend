@@ -34,6 +34,7 @@ export class JobRepository {
         id: true,
         title: true,
         disabled: true,
+        slug: true,
         createdAt: true,
         creator: {
           select: {
@@ -249,4 +250,29 @@ export class JobRepository {
       },
     });
   }
+
+  async findExpiredJobs() {
+    return prisma.job.findMany({
+      where: {
+        disabled: false,
+
+        lastDate: {
+          not: null,
+          lt: new Date(),
+        },
+      },
+    });
+  }
+
+  async disableJob(jobId: string) {
+    return prisma.job.update({
+      where: {
+        id: jobId,
+      },
+      data: {
+        disabled: true,
+      },
+    });
+  };
+
 }

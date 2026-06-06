@@ -5,6 +5,7 @@ import { ApplyJobDTO } from "./public.types";
 const publicService = new PublicService();
 
 export class PublicController {
+
   async applyJob(
     req: Request<{ jobId: string }, {}, ApplyJobDTO>,
     res: Response,
@@ -37,6 +38,18 @@ export class PublicController {
       res.status(500).json({
         success: false,
         message: error.message || "Failed to get job",
+      });
+    }
+  }
+
+  async validateInterviewToken(req: Request<{ token: string }>, res: Response) {
+    try {
+      const result = await publicService.validateInterviewToken(req.params.token);
+      res.json({ success: true, data: result });
+    } catch (error: any) {
+      res.status(500).json({
+        success: false,
+        message: error.message || "Failed to validate interview token",
       });
     }
   }
