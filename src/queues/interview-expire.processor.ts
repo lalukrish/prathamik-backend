@@ -4,25 +4,21 @@ import { processExpiredInterviews } from "../modules/interviews/interview-expire
 
 export const interviewExpireWorker = new Worker(
     "interview-expire",
-
-    async () => {
-        await processExpiredInterviews();
-    },
+    processExpiredInterviews,
     {
         connection: redisConnection,
     },
+
 );
+
+
 
 interviewExpireWorker.on("ready", () => {
     console.log("✅ Interview Expire Worker Ready");
 });
 
-interviewExpireWorker.on("active", (job) => {
-    console.log(`🎤 Interview Expire Job Started: ${job.id}`);
-});
-
 interviewExpireWorker.on("completed", (job) => {
-    console.log(`✅ Interview Expire Job Completed: ${job?.id}`);
+    console.log(`✅ Expire Job Completed: ${job?.id}`);
 });
 
 interviewExpireWorker.on("failed", (job, err) => {

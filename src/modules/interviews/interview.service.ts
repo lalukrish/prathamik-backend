@@ -279,11 +279,8 @@ export const rescheduleInterview = async ({
 
     await cancelInterview(oldInterview.id, {
         cancelledAt: new Date(),
-
         cancelledById: userId,
-
         cancelledByType: "RECRUITER",
-
         cancelledReason: reason,
     });
 
@@ -423,7 +420,8 @@ export const cancelInterviewService = async ({
     });
 
     return result;
-};
+}
+
 
 export const getScheduleHistory = async (applicationId: string, orgId: string) => {
     const interviews = await findInterviewsByApplicationId(applicationId, orgId);
@@ -431,3 +429,4 @@ export const getScheduleHistory = async (applicationId: string, orgId: string) =
     // const interviewActivities = await findInterviewActivitiesByInterviewIds(interviewIds);
     return interviews;
 };
+

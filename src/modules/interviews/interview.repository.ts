@@ -213,6 +213,20 @@ export const findInterviewByToken = async (token: string) => {
 };
 
 export const cancelInterview = async (interviewId: string, data: any) => {
+    const interview = await prisma.interview.findUnique({
+        where: {
+            id: interviewId,
+        },
+    });
+
+    if (!interview) {
+        throw new Error("Interview not found");
+    }
+
+    if (interview.status === "CANCELLED") {
+        return interview;
+    }
+
     return prisma.interview.update({
         where: {
             id: interviewId,
@@ -318,3 +332,4 @@ export const findInterviewActivitiesByInterviewIds = async (interviewIds: string
         },
     });
 };
+

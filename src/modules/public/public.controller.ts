@@ -53,4 +53,100 @@ export class PublicController {
       });
     }
   }
+  async cancelInterview(
+    req: Request,
+    res: Response
+  ) {
+    const result = await publicService.cancelInterview(
+      req.params.token,
+      req.body.reason,
+    );
+
+    return res.status(200).json({
+      success: true,
+      message: "Interview cancelled successfully",
+    });
+  };
+
+  async startInterview(req: Request<{ token: string }>, res: Response) {
+    try {
+      const result = await publicService.startInterview(req.params.token);
+      res.json({ success: true, data: result });
+    } catch (error: any) {
+      res.status(500).json({
+        success: false,
+        message: error.message || "Failed to start interview",
+      });
+    }
+  }
+
+  async getInterviewQuestion(
+    req: Request,
+    res: Response
+  ) {
+    const result =
+      await publicService.getInterviewQuestion(
+        req.params.token
+      );
+
+    return res.status(200).json({
+      success: true,
+      data: result,
+    });
+  };
+
+  async submitInterviewAnswer(
+    req: Request,
+    res: Response
+  ) {
+    const result =
+      await publicService.submitInterviewAnswer({
+        token: req.params.token,
+        questionId:
+          req.body.questionId,
+        answer: req.body.answer,
+      });
+
+    return res.status(201).json({
+      success: true,
+      message:
+        "Answer submitted successfully",
+      data: result,
+    });
+  };
+
+  async logSecurityEvent(
+    req: Request,
+    res: Response
+  ) {
+    const result =
+      await publicService.logSecurityEvent({
+        token: req.params.token,
+        type: req.body.type,
+        metadata: req.body.metadata,
+      });
+
+    return res.status(201).json({
+      success: true,
+      message: "Security event logged",
+      data: result,
+    });
+  };
+
+  async completeInterview(
+    req: Request,
+    res: Response
+  ) {
+    const result =
+      await publicService.completeInterview(
+        req.params.id
+      );
+
+    return res.status(200).json({
+      success: true,
+      message:
+        "Interview completed successfully",
+      data: result,
+    });
+  };
 }

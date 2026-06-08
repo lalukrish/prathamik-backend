@@ -71,7 +71,6 @@ export class JobController {
       }
 
       const job = await jobService.getJob(req.params.slug, orgId);
-      console.log(job);
       res.json({ success: true, data: job });
     } catch (error) {
       logger.error({ error: error, message: "Failed to get job" });

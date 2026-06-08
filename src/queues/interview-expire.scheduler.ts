@@ -1,5 +1,6 @@
 import { interviewExpireQueue } from "./interview-expire.queue";
 export const registerInterviewExpireJob = async () => {
+
     await interviewExpireQueue.add(
         "expire-interviews",
         {},

@@ -529,8 +529,12 @@ model CandidateScore {
   applicationId  String      @unique
   resumeScore    Int?
   interviewScore Int?
+  technicalScore Int?
+  communicationScore Int?
+  problemSolvingScore Int?
   cheatScore     Int?
   overallScore   Int?
+  aiFeedback     String?
   createdAt      DateTime    @default(now()) @db.Timestamptz(6)
   application    Application @relation(fields: [applicationId], references: [id])
 }
