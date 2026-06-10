@@ -1,6 +1,7 @@
 import { candidateRepository } from "./candidate.repository";
 import { uploadResumeToStorage } from "../public/resume.service";
 import { ApplyJobDTO } from "../public/public.types";
+import applicationRepository from "../applications/application.repository";
 
 export const candidateService = {
   getCandidateById: async (id: string) => {
@@ -17,7 +18,16 @@ export const candidateService = {
     if (!user) {
       throw new Error("Application");
     }
-    return user;
+    const { parsedData, ...applicationData } = user;
+    return {
+      ...applicationData,
+      scores: {
+        experienceScore: parsedData?.scoring?.experienceScore,
+        skillMatchScore: parsedData?.scoring?.skillMatchScore,
+        communicationScore: parsedData?.scoring?.communicationScore,
+        resumeScore: user.scores?.resumeScore,
+      },
+    };
   },
 
   getAllCandidate: async (page: number, limit: number, isBlocked?: boolean) => {
@@ -169,4 +179,24 @@ export const candidateService = {
     return application;
   },
 
+  async getInterviewHistory(
+    applicationId: string,
+    orgId: string
+  ) {
+    const application =
+      await applicationRepository.findById(
+        applicationId,
+        orgId
+      );
+
+    if (!application) {
+      throw new Error(
+        "Application not found"
+      );
+    }
+
+    return candidateRepository.getInterviewHistory(
+      applicationId
+    );
+  }
 };

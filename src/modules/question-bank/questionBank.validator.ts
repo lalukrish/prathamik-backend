@@ -25,17 +25,13 @@ export const difficultyEnum = z.enum([
 export const createQuestionBankSchema =
     z.object({
         jobId: z.string().uuid().optional(),
-
         title: z.string().min(1),
-
         description:
             z.string().optional(),
-
         mode: z.enum([
             "MANUAL",
             "AI",
         ]),
-
         config: z
             .object({
                 count: z

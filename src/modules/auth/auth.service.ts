@@ -105,6 +105,7 @@ export const authService = {
         email: user.email,
         // role: user.role,
         orgId: user.orgId,
+        orgName: user.organization?.name,
         // isActive: false,
       },
       accessToken,

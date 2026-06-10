@@ -1,3 +1,4 @@
+import { time } from "node:console";
 import { z } from "zod";
 
 export const applyJobSchema = z.object({
@@ -57,6 +58,7 @@ export const submitInterviewAnswerSchema =
     body: z.object({
       questionId: z.string().uuid(),
       answer: z.string().min(1).max(10000),
+      durationSeconds: z.number(),
     }),
   });
 

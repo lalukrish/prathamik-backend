@@ -209,6 +209,15 @@ export class JobRepository {
             totalExperience: true,
           },
         },
+        interviews: {
+          select: {
+            status: true
+          },
+          orderBy: {
+            createdAt: "desc"
+          },
+          take: 1
+        }
 
       },
 

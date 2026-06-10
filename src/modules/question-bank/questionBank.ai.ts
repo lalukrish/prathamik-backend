@@ -87,11 +87,20 @@ Rules:
 - difficulty must be EASY, MEDIUM, or HARD
 - type must be one of the allowed question types
 - Add realistic weights
+- Add estimated answerTimeSeconds for each question
 
 Weight Rules:
 EASY = 5
 MEDIUM = 10
 HARD = 20
+
+Answer Time Rules:
+- EASY: 30-60 seconds
+- MEDIUM: 60-180 seconds
+- HARD: 180-600 seconds
+- Coding questions may require more time
+- System design questions may require the highest time
+- Time should reflect realistic interview expectations
 
 JSON format:
 
@@ -101,6 +110,7 @@ JSON format:
     "type": "",
     "difficulty": "",
     "weight": 10,
+    "timeLimitSeconds": 120,
     "skillTags": [],
     "options": []
   }

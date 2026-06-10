@@ -33,11 +33,13 @@ export const evaluateInterview =
         const qaPairs =
             interview.answers.map(
                 (answer) => ({
+                    answerId: answer.id,
                     question:
                         answer.question
                             .question,
                     answer:
                         answer.answerText,
+                    maxScore: answer.question.maxScore,
                 })
             );
 
@@ -70,6 +72,19 @@ export const evaluateInterview =
                 interviewScore: evaluation.overallScore,
             },
         });
+
+        await Promise.all(
+            evaluation.questions.map((q: any) =>
+                prisma.interviewAnswer.update({
+                    where: {
+                        id: q.answerId,
+                    },
+                    data: {
+                        score: q.score,
+                    },
+                })
+            )
+        );
 
         await prisma.application.update({
             where: {

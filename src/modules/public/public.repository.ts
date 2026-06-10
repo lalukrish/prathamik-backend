@@ -208,12 +208,13 @@ export class PublicRepo {
         });
     }
 
-    async saveAnswer(interviewId: string, questionId: string, answerText: string) {
+    async saveAnswer(interviewId: string, questionId: string, answerText: string, durationSeconds?: number) {
         return prisma.interviewAnswer.create({
             data: {
                 interviewId,
                 questionId,
                 answerText,
+                durationSeconds,
             },
         });
     }
@@ -237,9 +238,9 @@ export class PublicRepo {
         });
     };
 
-    async findInterviewById(id: string) {
+    async findInterviewById(token: string) {
         return prisma.interview.findUnique({
-            where: { id },
+            where: { accessToken: token },
             include: {
                 questions: true,
                 answers: true,
@@ -262,7 +263,15 @@ export class PublicRepo {
         });
     }
 
-    async completeInterview(interviewId: string, suspicionScore: number) {
+    async completeInterview(interviewId: string, suspicionScore: number, applicationId: string) {
+        await prisma.candidateScore.update({
+            where: {
+                applicationId
+            },
+            data: {
+                cheatScore: suspicionScore
+            }
+        })
         return prisma.interview.update({
             where: {
                 id: interviewId,
@@ -270,7 +279,6 @@ export class PublicRepo {
             data: {
                 status: "COMPLETED",
                 completedAt: new Date(),
-                suspicionScore,
             },
         });
     }

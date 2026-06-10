@@ -1,3 +1,5 @@
+import { CandidateScore } from './../../../node_modules/.prisma/client/index.d';
+import { includes } from 'zod';
 import { prisma } from "../../config/db";
 
 export const candidateRepository = {
@@ -26,7 +28,7 @@ export const candidateRepository = {
         status: true,
         overallScore: true,
         createdAt: true,
-
+        parsedData: true,
         candidate: {
           select: {
             id: true,
@@ -49,6 +51,7 @@ export const candidateRepository = {
           select: {
             id: true,
             status: true,
+            accessToken: true,
             scheduledStartAt: true,
           },
           orderBy: {
@@ -58,12 +61,9 @@ export const candidateRepository = {
         },
         scores: {
           select: {
-            resumeScore: true,
-            interviewScore: true,
-            cheatScore: true,
-            overallScore: true,
-          },
-        },
+            resumeScore: true
+          }
+        }
       },
     });
   },
@@ -114,6 +114,18 @@ export const candidateRepository = {
             createdAt: true,
             updatedAt: true,
           },
+          include: {
+            interviews: {
+              select: {
+                id: true,
+                status: true
+              },
+              orderBy: {
+                createdAt: "desc"
+              },
+              take: 1
+            }
+          }
         },
       },
       skip,
@@ -373,4 +385,69 @@ export const candidateRepository = {
     });
   },
 
+  getInterviewHistory: async (applicationId: string) => {
+    return prisma.interview.findMany({
+      where: {
+        applicationId,
+      },
+      orderBy: {
+        createdAt: "desc",
+      },
+      select: {
+        id: true,
+        durationMinutes: true,
+        status: true,
+        scheduledStartAt: true,
+        scheduledEndAt: true,
+        totalQuestions: true,
+        totalScore: true,
+        startedAt: true,
+        completedAt: true,
+        createdAt: true,
+
+        answers: {
+          select: {
+            id: true,
+            answerText: true,
+            score: true,
+            durationSeconds: true,
+
+            question: {
+              select: {
+                id: true,
+                question: true,
+                maxScore: true,
+                timeLimitSeconds: true,
+                type: true,
+                difficulty: true,
+              },
+            },
+          },
+        },
+
+        questionBank: {
+          select: {
+            id: true,
+            title: true,
+          },
+        },
+
+        application: {
+          select: {
+            scores: true
+          },
+        },
+
+        securityEvents: {
+          select: {
+            id: true,
+            type: true,
+            severity: true,
+            metadata: true,
+            createdAt: true,
+          },
+        },
+      },
+    });
+  },
 };

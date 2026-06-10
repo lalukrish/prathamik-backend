@@ -232,10 +232,12 @@ export class PublicService {
     token,
     questionId,
     answer,
+    durationSeconds,
   }: {
     token: string;
     questionId: string;
     answer: string;
+    durationSeconds?: number;
   }) {
     const interview =
       await publicRepo.findInterviewByToken(
@@ -283,7 +285,8 @@ export class PublicService {
     return publicRepo.saveAnswer(
       interview.id,
       questionId,
-      answer
+      answer,
+      durationSeconds,
     );
   };
 
@@ -322,9 +325,9 @@ export class PublicService {
     });
   }
 
-  async completeInterview(id: string) {
+  async completeInterview(token: string) {
     const interview =
-      await publicRepo.findInterviewById(id);
+      await publicRepo.findInterviewById(token);
 
     if (!interview) {
       throw new Error(
@@ -342,91 +345,89 @@ export class PublicService {
 
     const securityEvents =
       await publicRepo.getSecuritySummary(
-        id
+        interview.id
       );
 
-    let suspicionScore = 0;
+    let riskPoints = 0;
 
     securityEvents.forEach((event) => {
       const count = event._count;
 
       switch (event.type) {
         case "TAB_SWITCH":
-          suspicionScore += count * 2;
+          riskPoints += count * 1;
           break;
 
         case "WINDOW_BLUR":
-          suspicionScore += count * 2;
+          riskPoints += count * 1;
           break;
 
         case "WINDOW_MINIMIZE":
-          suspicionScore += count * 5;
+          riskPoints += count * 2;
           break;
 
         case "FULLSCREEN_EXIT":
-          suspicionScore += count * 8;
+          riskPoints += count * 3;
           break;
 
         case "COPY_PASTE":
-          suspicionScore += count * 15;
+          riskPoints += count * 5;
           break;
 
         case "RIGHT_CLICK":
-          suspicionScore += count * 3;
+          riskPoints += count * 1;
           break;
 
         case "MULTIPLE_MONITORS":
-          suspicionScore += count * 20;
+          riskPoints += count * 6;
           break;
 
         case "DEVTOOLS_OPEN":
-          suspicionScore += count * 25;
+          riskPoints += count * 8;
           break;
 
         case "NETWORK_DISCONNECT":
-          suspicionScore += count * 2;
+          riskPoints += count * 1;
           break;
 
         case "LONG_INACTIVITY":
-          suspicionScore += count * 10;
+          riskPoints += count * 3;
           break;
 
         case "MULTIPLE_FACES":
-          suspicionScore += count * 30;
+          riskPoints += count * 8;
           break;
 
         case "VOICE_MISMATCH":
-          suspicionScore += count * 40;
+          riskPoints += count * 10;
           break;
 
         case "RAPID_ANSWERING":
-          suspicionScore += count * 10;
+          riskPoints += count * 2;
           break;
 
         case "SUSPICIOUS_TYPING":
-          suspicionScore += count * 15;
-          break;
-
-        default:
+          riskPoints += count * 4;
           break;
       }
     });
 
     const result =
       await publicRepo.completeInterview(
-        id,
-        suspicionScore
+        interview.id,
+        riskPoints,
+        interview.applicationId
       );
 
     await publicRepo.interviewActivityCandidate(
-      id,
+      interview.id,
       interview.application.candidateId,
     );
 
     await interviewEvaluationQueue.add(
       "evaluate-interview",
       {
-        interviewId: id,
+        interviewId: interview.id,
       }
     );
 

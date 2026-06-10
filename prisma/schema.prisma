@@ -301,6 +301,7 @@ model Interview {
   activities     InterviewActivity[]
   Organization   Organization?            @relation(fields: [organizationId], references: [id])
   organizationId String?
+  scores         CandidateScore[]
   // ==================================================
   // Indexes
   // ==================================================
@@ -527,6 +528,7 @@ enum SecuritySeverity {
 model CandidateScore {
   id             String      @id @default(uuid())
   applicationId  String      @unique
+  interviewId    String     
   resumeScore    Int?
   interviewScore Int?
   technicalScore Int?
@@ -537,6 +539,7 @@ model CandidateScore {
   aiFeedback     String?
   createdAt      DateTime    @default(now()) @db.Timestamptz(6)
   application    Application @relation(fields: [applicationId], references: [id])
+  interview      Interview   @relation(fields: [interviewId], references: [id])
 }
 
 enum Role {

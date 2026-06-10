@@ -185,6 +185,33 @@ export class CandidateController {
       res.status(404).json({ error: err.message });
     }
   };
+
+  getInterviewHistory =
+    async (
+      req: Request,
+      res: Response
+    ) => {
+      const applicationId = req.params.applicationId;
+      const orgId = req.user.orgId;
+      if (!orgId) {
+        res.status(400).json({ error: "orgId is required." });
+        return;
+      }
+      if (!applicationId) {
+        res.status(400).json({ error: "applicationId is required." });
+        return;
+      }
+      const result =
+        await candidateService.getInterviewHistory(
+          applicationId,
+          orgId
+        );
+
+      return res.status(200).json({
+        success: true,
+        data: result,
+      });
+    };
 }
 
 export const candidateController = new CandidateController();

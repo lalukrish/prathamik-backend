@@ -102,9 +102,9 @@ export class PublicController {
     const result =
       await publicService.submitInterviewAnswer({
         token: req.params.token,
-        questionId:
-          req.body.questionId,
+        questionId: req.body.questionId,
         answer: req.body.answer,
+        durationSeconds: req.body.durationSeconds ? Number(req.body.durationSeconds) : 0,
       });
 
     return res.status(201).json({
@@ -137,9 +137,13 @@ export class PublicController {
     req: Request,
     res: Response
   ) {
+    const token = req.params.token;
+    if (!token) {
+
+    }
     const result =
       await publicService.completeInterview(
-        req.params.id
+        token
       );
 
     return res.status(200).json({

@@ -18,5 +18,5 @@ router.get("/interviews/:token/start", controller.startInterview);
 router.get("/interviews/:token/question", controller.getInterviewQuestion);
 router.post("/interviews/:token/answer", validate(submitInterviewAnswerSchema), controller.submitInterviewAnswer);
 router.post("/interviews/:token/security-event", validate(interviewSecurityEventSchema), controller.logSecurityEvent);
-// router.post("/interviews/:id/complete", controller.completeInterview);
+router.post("/interviews/:token/complete", controller.completeInterview);
 export default router;

@@ -6,7 +6,9 @@ import { bulkQuestionSchema, createQuestionBankSchema, updateQuestionBankSchema,
 
 const router = Router();
 
-router.post("/", authMiddleware, validate(createQuestionBankSchema), controller.createQuestionBank,);
+router.post("/", authMiddleware,
+    //  validate(createQuestionBankSchema), 
+    controller.createQuestionBank);
 router.get("/", authMiddleware, controller.getQuestionBanks,);
 router.get("/:id", authMiddleware, controller.getQuestionBankById,);
 router.patch("/:id", authMiddleware, validate(updateQuestionBankSchema), controller.updateQuestionBank,);
