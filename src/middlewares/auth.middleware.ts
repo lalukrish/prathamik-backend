@@ -1,6 +1,6 @@
 import { NextFunction, Request, Response } from "express";
 import { prisma } from "../config/db";
-import { authRepository } from "../modules/auth/auth.repository";
+import { authRepository } from "../modules/auth-section/auth.repository";
 import { verifyAccessToken } from "../modules/auth/auth.service";
 
 export const authMiddleware = async (
@@ -41,19 +41,36 @@ export const authMiddleware = async (
       .json({ success: false, message: "Session ended, please login again" });
   }
 
-  let a = await prisma.session.update({
+  await prisma.authSession.update({
     where: {
       userId: result.decoded!.id,
       id: session.id,
     },
-
     data: {
       lastActiveAt: new Date(),
     },
   });
 
-  console.log(a);
-
   req.user = result.decoded!;
   next();
+};
+
+export const roleMiddleware = (...allowedRoles: string[]) => {
+  return (req: Request, res: Response, next: NextFunction) => {
+    if (!req.user) {
+      return res.status(401).json({
+        success: false,
+        message: "Unauthorized",
+      });
+    }
+
+    if (!allowedRoles.includes(req.user.role)) {
+      return res.status(403).json({
+        success: false,
+        message: "Access denied",
+      });
+    }
+
+    next();
+  };
 };

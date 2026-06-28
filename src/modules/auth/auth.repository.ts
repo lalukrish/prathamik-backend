@@ -2,7 +2,17 @@ import { prisma } from "../../config/db";
 
 export const authRepository = {
   findByEmail: async (email: string) =>
-    prisma.user.findUnique({ where: { email } }),
+    prisma.user.findUnique(
+      {
+        where: { email },
+        include: {
+          organization: {
+            select: {
+              name: true,
+            },
+          },
+        },
+      }),
 
   findById: async (id: string) => prisma.user.findUnique({ where: { id } }),
 

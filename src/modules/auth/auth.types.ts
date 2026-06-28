@@ -9,6 +9,7 @@ export interface AuthUser {
   email: string;
   // role: string;
   orgId: string | null;
+  orgName?: string;
   // isActive: boolean;
 }
 
@@ -16,11 +17,11 @@ export interface AuthResponse {
   user: AuthUser;
   accessToken: string;
   refreshToken: string;
+  orgName?: string;
 }
 
 export interface AccessTokenPayload {
   id: string;
-  orgId: string | null;
   role: string;
   sessionId: string;
 }

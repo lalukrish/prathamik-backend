@@ -3,565 +3,387 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
 }
-
-model Organization {
-  id                 String              @id @default(uuid())
-  name               String
-  createdById        String?
-  createdBy          User?               @relation("OrganizationCreatedBy", fields: [createdById], references: [id])
-  branches           Branch[]
-  users              User[]
-  jobs               Job[]
-  candidates         Candidate[]
-  createdAt          DateTime            @default(now()) @db.Timestamptz(6)
-  questionBanks      QuestionBank[]
-  interviewTemplates InterviewTemplate[]
-}
-
-model Branch {
-  id String @id @default(uuid())
-
-  name String
-
-  organizationId String
-  organization   Organization @relation(fields: [organizationId], references: [id])
-  users          User[]
-  createdAt      DateTime     @default(now()) @db.Timestamptz(6)
-}
-
-model User {
-  id       String  @id @default(uuid())
-  name     String?
-  email    String  @unique
-  password String
-  role     Role
-
-  orgId        String?
-  organization Organization? @relation(fields: [orgId], references: [id])
-
-  createdOrganizations Organization[] @relation("OrganizationCreatedBy")
-
-  branchId String?
-  branch   Branch? @relation(fields: [branchId], references: [id])
-
-  createdAt DateTime @default(now()) @db.Timestamptz(6)
-  updatedAt DateTime @updatedAt @db.Timestamptz(6)
-
-  isActive Boolean @default(true)
-
-  candidates  Candidate[]
-  createdJobs Job[]        @relation("JobCreatedBy")
-  updatedJobs Job[]        @relation("JobUpdatedBy")
-  sessions    Session[]
-  profile     UserProfile?
-}
-
-model UserProfile {
-  id           String   @id @default(uuid())
-  userId       String   @unique
-  phone        String?
-  bio          String?
-  addressLine1 String?
-  city         String?
-  state        String?
-  country      String?
-  zipCode      String?
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
-  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-}
-
-model Session {
-  id           String    @id @default(uuid())
-  userId       String
-  device       String?
-  ipAddress    String?
-  userAgent    String?
-  isActive     Boolean   @default(true)
-  expiresAt    DateTime  @db.Timestamptz(6)
-  createdAt    DateTime  @default(now()) @db.Timestamptz(6)
-  tokenHash    String?   @unique
-  lastActiveAt DateTime? @updatedAt @db.Timestamptz(6)
-  user         User      @relation(fields: [userId], references: [id])
-
-  @@index([userId])
-  @@index([tokenHash])
-}
-
-model Job {
-  id                 String                 @id @default(uuid())
-  title              String
-  slug               String                 @unique
-  description        String
-  requiredSkills     String[]
-  niceToHave         String[]
-  experienceMin      Int?
-  experienceMax      Int?
-  embedding          Unsupported("vector")?
-  orgId              String
-  createdBy          String
-  createdAt          DateTime               @default(now()) @db.Timestamptz(6)
-  updatedAt          DateTime               @updatedAt @db.Timestamptz(6)
-  updatedBy          String?
-  jdHtml             String?
-  lastDate           DateTime?
-  location           String?
-  workMode           String?
-  disabled           Boolean                @default(false)
-  applications       Application[]
-  creator            User                   @relation("JobCreatedBy", fields: [createdBy], references: [id])
-  organization       Organization           @relation(fields: [orgId], references: [id])
-  updater            User?                  @relation("JobUpdatedBy", fields: [updatedBy], references: [id])
-  questionBanks      QuestionBank[]
-  interviewTemplates InterviewTemplate[]
-}
-
-model Candidate {
-  id               String        @id @default(uuid())
-  /// ///////////////////////////////////////////////////
-  /// ///////////////////////////////////////////////////
-  name             String
-  email            String        @unique
-  phone            String?
-  /// ///////////////////////////////////////////////////
-  /// ///////////////////////////////////////////////////
-  orgId            String
-  /// ///////////////////////////////////////////////////
-  /// ///////////////////////////////////////////////////
-  createdAt        DateTime      @default(now()) @db.Timestamptz(6)
-  /// ///////////////////////////////////////////////////
-  /// ///////////////////////////////////////////////////
-  currentRole      String?
-  /// ///////////////////////////////////////////////////
-  /// ///////////////////////////////////////////////////
-  linkedinUrl      String?
-  skills           String[]
-  totalExperience  Float?
-  parsedData       Json?
-  currentCTC       Float?
-  expectedSalary   Float?
-  isOnNoticePeriod Boolean       @default(false)
-  noticePeriod     Int?
-  createdBy        String?
-  isBlocked        Boolean       @default(false)
-  applications     Application[]
-  resumes          Resume[]
-  creator          User?         @relation(fields: [createdBy], references: [id])
-  organization     Organization  @relation(fields: [orgId], references: [id])
-  updatedAt        DateTime      @updatedAt @db.Timestamptz(6)
-  /// ///////////////////////////////////////////////////
-  /// ///////////////////////////////////////////////////
-
-  @@index([email])
-  @@index([phone])
-  @@index([orgId])
-}
-
-model Resume {
-  id String @id @default(uuid())
-
-  candidateId String
-
-  resumeUrl String?
-
-  storagePath String?
-
-  fileName String
-
-  fileSize Int
-
-  mimeType String
-
-  createdAt DateTime @default(now())
-
-  // ============================================
-  // Relations
-  // ============================================
-
-  candidate Candidate @relation(fields: [candidateId], references: [id])
-
-  applications Application[]
-}
-
-model Application {
-  id String @id @default(uuid())
-
-  // =====================================================
-  // Relations
-  // =====================================================
-
-  jobId       String
-  candidateId String
-  resumeId    String?
-
-  candidate Candidate @relation(fields: [candidateId], references: [id])
-
-  job Job @relation(fields: [jobId], references: [id])
-
-  resume Resume? @relation(fields: [resumeId], references: [id])
-
-  // =====================================================
-  // Application Status
-  // =====================================================
-
-  status ApplicationStatus @default(APPLIED)
-
-  // =====================================================
-  // AI Processing
-  // =====================================================
-
-  processingStatus ProcessingStatus @default(QUEUED)
-
-  processingError String?
-
-  parsedData Json?
-
-  // =====================================================
-  // AI Evaluation
-  // =====================================================
-
-  overallScore Int?
-
-  aiSummary String?
-
-  matchedSkills String[]
-
-  missingSkills String[]
-
-  // =====================================================
-  // Timestamps
-  // =====================================================
-
-  createdAt DateTime @default(now()) @db.Timestamptz(6)
-
-  updatedAt DateTime @updatedAt @db.Timestamptz(6)
-
-  // =====================================================
-  // Future Relations
-  // =====================================================
-
-  scores CandidateScore?
-
-  interview Interview?
-
-  logs ProcessingLog[]
-
-  // =====================================================
-  // Indexes
-  // =====================================================
-
-  @@unique([candidateId, jobId])
-  @@index([candidateId])
-  @@index([jobId])
-  @@index([status])
-  @@index([processingStatus])
-}
-
-model ProcessingLog {
-  id            String      @id @default(uuid())
-  applicationId String
-  step          String
-  status        String
-  message       String?
-  createdAt     DateTime    @default(now()) @db.Timestamptz(6)
-  application   Application @relation(fields: [applicationId], references: [id])
-
-  @@index([applicationId])
-}
-
-model Interview {
-  id                   String                   @id @default(uuid())
-  applicationId        String                   @unique
-  templateId           String?
-  accessToken          String?                  @unique
-  status               InterviewStatus          @default(PENDING)
-  totalQuestions       Int?
-  totalScore           Int?
-  cheatScore           Int?
-  suspiciousEvents     Int                      @default(0)
-  riskLevel            SecuritySeverity?
-  scheduledStartAt     DateTime?
-  scheduledEndAt       DateTime?
-  startedAt            DateTime?
-  startedByCandidateAt DateTime?
-  completedAt          DateTime?
-  submittedAt          DateTime?
-  expiresAt            DateTime?
-  isSubmitted          Boolean                  @default(false)
-  createdBy            String?
-  createdAt            DateTime                 @default(now()) @db.Timestamptz(6)
-  application          Application              @relation(fields: [applicationId], references: [id])
-  template             InterviewTemplate?       @relation(fields: [templateId], references: [id])
-  questions            InterviewQuestion[]
-  answers              InterviewAnswer[]
-  securityEvents       InterviewSecurityEvent[]
-  submittedBySystem    Boolean                  @default(false)
-
-  @@index([status])
-  @@index([scheduledStartAt])
-}
-
-model InterviewQuestion {
-  id String @id @default(uuid())
-
-  interviewId String
-
-  questionId String?
-
-  question String
-
-  type QuestionType
-
-  difficulty DifficultyLevel?
-
-  skillTags String[]
-
-  options Json?
-
-  correctAnswer Json?
-
-  audioUrl String?
-
-  aiGenerated Boolean @default(false)
-
-  order Int
-
-  maxScore Int @default(10)
-
-  createdAt DateTime @default(now())
-
-  interview Interview @relation(fields: [interviewId], references: [id])
-
-  questionRef Question? @relation(fields: [questionId], references: [id])
-
-  answers InterviewAnswer[]
-
-  timeLimitSeconds Int?
-
-  @@index([interviewId])
-}
-
-model InterviewAnswer {
-  id              String            @id @default(uuid())
-  interviewId     String
-  questionId      String
-  answerText      String?
-  selectedOptions Json?
-  audioAnswerUrl  String?
-  transcription   String?
-  score           Int?
-  aiFeedback      String?
-  cheatingFlag    Boolean           @default(false)
-  answeredAt      DateTime          @default(now())
-  interview       Interview         @relation(fields: [interviewId], references: [id])
-  question        InterviewQuestion @relation(fields: [questionId], references: [id])
-  durationSeconds Int?
-
-  @@index([interviewId])
-  @@index([questionId])
-}
-
-model QuestionBank {
-  id String @id @default(uuid())
-
-  orgId String
-
-  jobId String?
-
-  title String
-
-  description String?
-
-  mode QuestionBankMode?
-
-  aiGenerated Boolean @default(false)
-
-  totalQuestions Int @default(0)
-
-  createdBy String?
-
-  isActive Boolean @default(true)
-
-  createdAt DateTime @default(now())
-
-  // =====================================================
-  // Relations
-  // =====================================================
-
-  organization Organization @relation(fields: [orgId], references: [id])
-
-  job Job? @relation(fields: [jobId], references: [id])
-
-  questions Question[]
-
-  @@index([orgId])
-  @@index([jobId])
-}
-
-model Question {
-  id              String @id @default(uuid())
-
-  questionBankId  String
-
-  question        String
-
-  type            QuestionType
-
-  difficulty      DifficultyLevel
-
-  weight          Int @default(10)
-
-  skillTags       String[]
-
-  timeLimitSeconds Int @default(60)
-
-  options         Json?
-
-  audioUrl        String?
-
-  aiGenerated     Boolean @default(false)
-
-  createdAt       DateTime @default(now())
-
-  questionBank    QuestionBank @relation(fields: [questionBankId], references: [id])
-
-  templateQuestions InterviewTemplateQuestion[]
-
-  interviewQuestions InterviewQuestion[]
-
-  @@index([questionBankId])
-}
-
-enum QuestionBankMode {
-  MANUAL
-  AI
-}
-
-model InterviewTemplate {
-  id              String                      @id @default(uuid())
-  orgId           String
-  jobId           String?
-  title           String
-  description     String?
-  durationMinutes Int?
-  totalQuestions  Int?
-  aiQuestionCount Int                         @default(0)
-  createdBy       String?
-  createdAt       DateTime                    @default(now())
-  organization    Organization                @relation(fields: [orgId], references: [id])
-  job             Job?                        @relation(fields: [jobId], references: [id])
-  questions       InterviewTemplateQuestion[]
-  interviews      Interview[]
-}
-
-model InterviewTemplateQuestion {
-  id         String            @id @default(uuid())
-  questionId String
-  templateId String
-  order      Int
-  weight     Int               @default(10)
-  isRequired Boolean           @default(true)
-  template   InterviewTemplate @relation(fields: [templateId], references: [id])
-  question   Question          @relation(fields: [questionId], references: [id])
-
-  @@index([templateId])
-  @@index([questionId])
+enum Role {
+  ADMIN
+  USER
 }
 
 enum QuestionType {
-  TEXT
-  MULTIPLE_SELECT
-  RADIO
-  VOICE_SPEAK
-  VOICE_TYPE
+  MCQ
+  TRUE_FALSE
 }
 
-enum DifficultyLevel {
+enum TestStatus {
+  NOT_STARTED
+  IN_PROGRESS
+  PAUSED
+  SUBMITTED
+  EXPIRED
+}
+
+enum SessionEvent {
+  START
+  PAUSE
+  RESUME
+  SUBMIT
+  AUTO_SUBMIT
+}
+
+enum Difficulty {
   EASY
   MEDIUM
   HARD
 }
 
-enum InterviewStatus {
+enum UserStatus {
+  ACTIVE
+  BLOCKED
+}
+
+
+enum ExamCategory {
+  UPSC
+  SSC
+  IBPS
+  RRB
+  NEET
+  JEE
+  PSC
+  OTHER
+}
+
+enum AccessMode {
+  FREE
+  PAID
+}
+
+enum PaymentStatus {
   PENDING
-  IN_PROGRESS
-  COMPLETED
-  CANCELLED
-}
-
-model InterviewSecurityEvent {
-  id          String            @id @default(uuid())
-  interviewId String
-  type        SecurityEventType
-  severity    SecuritySeverity  @default(LOW)
-  metadata    Json?
-  createdAt   DateTime          @default(now())
-  interview   Interview         @relation(fields: [interviewId], references: [id])
-
-  @@index([interviewId])
-  @@index([type])
-}
-
-enum SecurityEventType {
-  TAB_SWITCH
-  WINDOW_BLUR
-  WINDOW_MINIMIZE
-  FULLSCREEN_EXIT
-  COPY_PASTE
-  RIGHT_CLICK
-  MULTIPLE_MONITORS
-  DEVTOOLS_OPEN
-  NETWORK_DISCONNECT
-  LONG_INACTIVITY
-  MULTIPLE_FACES
-  VOICE_MISMATCH
-  RAPID_ANSWERING
-  SUSPICIOUS_TYPING
-}
-
-enum SecuritySeverity {
-  LOW
-  MEDIUM
-  HIGH
-  CRITICAL
-}
-
-model CandidateScore {
-  id             String      @id @default(uuid())
-  applicationId  String      @unique
-  resumeScore    Int?
-  interviewScore Int?
-  cheatScore     Int?
-  overallScore   Int?
-  createdAt      DateTime    @default(now()) @db.Timestamptz(6)
-  application    Application @relation(fields: [applicationId], references: [id])
-}
-
-enum Role {
-  super_admin
-  admin
-  hr_manager
-  recruiter
-}
-
-enum Source {
-  applied
-  manual
-}
-
-enum ApplicationStatus {
-  APPLIED
-  SHORTLISTED
-  REJECTED
-  INTERVIEW
-}
-
-enum ProcessingStatus {
-  QUEUED
-  PROCESSING
-  COMPLETED
+  SUCCESS
   FAILED
+  REFUNDED
+}
+
+
+enum StudyGroupCategory {
+  UPSC
+  SSC
+  IBPS
+  RRB
+  NEET
+  JEE
+  PSC
+  OTHER
+}
+
+enum TopicImportance {
+  IMPORTANT
+  MEDIUM_IMPORTANT
+  LESS_IMPORTANT
+}
+
+
+model AuthSession {
+  id String @id @default(uuid())
+
+  userId String
+  user User @relation(fields: [userId], references: [id])
+
+  refreshTokenHash String @unique
+
+  expiresAt DateTime
+
+  isActive Boolean @default(true)
+
+  lastActiveAt DateTime?
+
+  deviceInfo String?
+  ipAddress String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+
+model User {
+  id String @id @default(uuid())
+
+  name String
+  email String @unique
+  password String
+
+  role Role @default(USER)
+  status UserStatus @default(ACTIVE)   // ← ADD THIS LINE
+
+  authSessions AuthSession[]
+
+  testsCreated MockTest[] @relation("CreatedTests")
+
+  attempts TestAttempt[]      
+
+  testSessions TestSession[]
+  enrollments  UserTestEnrollment[]
+  transactions Transaction[]
+  studyTopics  StudyTopic[]
+  topicVotes   TopicVote[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+
+
+model MockTest {
+  id String @id @default(uuid())
+
+  title String
+
+  description String?
+
+  durationMinutes Int
+
+  totalMarks Int
+
+  thumbnailUrl String?
+
+  isPublished Boolean @default(false)
+
+  createdById String
+  createdBy User @relation("CreatedTests", fields: [createdById], references: [id])
+  category        ExamCategory @default(OTHER)   
+  accessMode      AccessMode   @default(FREE)    
+  price           Float?                         
+  questions Question[]
+  attempts TestAttempt[]   
+
+  sessions TestSession[]
+  enrollments     UserTestEnrollment[]           
+  transactions    Transaction[]                  
+ 
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+
+model Subject {
+  id String @id @default(uuid())
+
+  name String @unique
+
+  questions Question[]
+
+  createdAt DateTime @default(now())
+}
+
+model Question {
+  id          String @id @default(uuid())
+
+  mockTestId  String
+  mockTest    MockTest @relation(fields: [mockTestId], references: [id])
+  
+  question    String
+  imageUrl String?
+  type        QuestionType @default(MCQ)
+
+  subjectId   String
+  subject     Subject @relation(fields: [subjectId], references: [id])
+  marks Int @default(1)
+  negativeMarks Float @default(0)
+  options     Option[]
+  description String?
+  userAnswers UserAnswer[]  // <-- ADD THIS
+  sortOrder Int @default(0)
+  difficulty Difficulty @default(MEDIUM)
+
+  createdAt   DateTime @default(now())
+}
+
+model Option {
+  id          String @id @default(uuid())
+
+  questionId  String
+  question    Question @relation(fields: [questionId], references: [id])
+
+  text        String
+
+  isCorrect   Boolean @default(false)
+  userAnswers UserAnswer[] // <-- required reverse relation
+
+}
+
+
+model TestAttempt {
+  id          String @id @default(uuid())
+
+  userId      String
+  user        User @relation(fields: [userId], references: [id])
+
+  mockTestId  String
+  mockTest    MockTest @relation(fields: [mockTestId], references: [id])
+
+  score       Int @default(0)
+
+  totalMarks  Int @default(0)
+
+  startedAt   DateTime @default(now())
+
+  submittedAt DateTime?
+
+  answers     UserAnswer[]
+
+  createdAt   DateTime @default(now())
+}
+
+model TestSession {
+  id String @id @default(uuid())
+
+  userId String
+  user User @relation(fields: [userId], references: [id])
+
+  mockTestId String
+  mockTest MockTest @relation(fields: [mockTestId], references: [id])
+
+  status TestStatus @default(IN_PROGRESS)
+
+  startedAt DateTime @default(now())
+
+  lastSeenAt DateTime?
+
+  submittedAt DateTime?
+
+  expiresAt DateTime
+
+  remainingSeconds Int
+
+  score Int?
+
+  answers UserAnswer[]
+
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+  @@index([mockTestId])
+  activities SessionActivity[]  
+
+}
+
+
+
+model UserAnswer {
+  id String @id @default(uuid())
+
+  attemptId String
+  attempt TestAttempt @relation(fields: [attemptId], references: [id])
+
+  sessionId String?
+  session TestSession? @relation(fields: [sessionId], references: [id])
+
+  questionId String
+  question Question @relation(fields: [questionId], references: [id])
+
+  selectedOptionId String
+  selectedOption Option @relation(fields: [selectedOptionId], references: [id])
+
+  isCorrect Boolean @default(false)
+  isVisited Boolean @default(false)
+
+  createdAt DateTime @default(now())
+    @@unique([sessionId, questionId])
+
+}
+
+model SessionActivity {
+  id String @id @default(uuid())
+
+  sessionId String
+  session TestSession @relation(fields: [sessionId], references: [id])
+
+  eventType SessionEvent
+  metadata Json?
+  
+  createdAt DateTime @default(now())
+}
+
+
+model UserTestEnrollment {
+  id          String     @id @default(uuid())
+
+  userId      String
+  user        User       @relation(fields: [userId], references: [id])
+
+  mockTestId  String
+  mockTest    MockTest   @relation(fields: [mockTestId], references: [id])
+
+  grantedAt   DateTime   @default(now())
+  expiresAt   DateTime?  // null = lifetime access
+
+  @@unique([userId, mockTestId])
+}
+
+model Transaction {
+  id                String        @id @default(uuid())
+
+  userId            String
+  user              User          @relation(fields: [userId], references: [id])
+
+  mockTestId        String
+  mockTest          MockTest      @relation(fields: [mockTestId], references: [id])
+
+  amount            Float
+  currency          String        @default("INR")
+
+  status            PaymentStatus @default(PENDING)
+
+  // Razorpay fields (nullable until payment happens)
+  razorpayOrderId   String?
+  razorpayPaymentId String?
+  razorpaySignature String?
+
+  createdAt         DateTime      @default(now())
+  updatedAt         DateTime      @updatedAt
+
+  @@index([userId])
+  @@index([mockTestId])
+}
+
+
+model StudyTopic {
+  id          String              @id @default(uuid())
+  userId      String
+  user        User                @relation(fields: [userId], references: [id])
+
+  category    StudyGroupCategory
+
+  title       String
+  content     String              // HTML from Lexical editor
+
+  votes       TopicVote[]
+
+  createdAt   DateTime            @default(now())
+  updatedAt   DateTime            @updatedAt
+
+  @@index([userId])
+  @@index([category])
+}
+
+
+model TopicVote {
+  id         String          @id @default(uuid())
+
+  userId     String
+  user       User            @relation(fields: [userId], references: [id])
+
+  topicId    String
+  topic      StudyTopic      @relation(fields: [topicId], references: [id])
+
+  importance TopicImportance
+
+  createdAt  DateTime        @default(now())
+  updatedAt  DateTime        @updatedAt
+
+  @@unique([userId, topicId])   // one vote per user per topic
+  @@index([topicId])
 }

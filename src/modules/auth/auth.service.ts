@@ -9,17 +9,17 @@ import {
   RefreshTokenPayload,
 } from "./auth.types";
 import { register } from "module";
-import { userService } from "../users/user.service";
-import { CreateUserInput } from "../users/user.types";
+// import { userService } from "../users/user.service";
+// import { CreateUserInput } from "../users/user.types";
 
-const ACCESS_SECRET = process.env.ACCESS_SECRET!;
-const REFRESH_SECRET = process.env.REFRESH_SECRET!;
+const ACCESS_SECRET = process.env.JWT_ACCESS_SECRET!;
+const REFRESH_SECRET = process.env.JWT_REFRESH_SECRET!;
 
 const hashToken = (token: string): string =>
   crypto.createHash("sha256").update(token).digest("hex");
 
 export const generateAccessToken = (payload: AccessTokenPayload): string =>
-  jwt.sign(payload, ACCESS_SECRET, { expiresIn: "150m" });
+  jwt.sign(payload, ACCESS_SECRET, { expiresIn: "250m" });
 
 export const generateRefreshToken = (payload: RefreshTokenPayload): string =>
   jwt.sign(payload, REFRESH_SECRET, { expiresIn: "7d" });
@@ -54,42 +54,35 @@ export const verifyRefreshToken = (token: string) => {
 export const authService = {
   async login(
     data: LoginInput,
-    meta: { ip?: string; userAgent?: string; device?: string },
-  ): Promise<AuthResponse> {
+    meta: {
+      ip?: string;
+      userAgent?: string;
+      device?: string;
+    },
+  ) {
     const user = await authRepository.findByEmail(data.email);
+
     if (!user) {
       throw new Error("EMAIL_NOT_FOUND");
     }
 
-    if (!user.isActive) {
-      throw new Error("ACCOUNT_DISABLED");
-    }
     const isMatch = await bcrypt.compare(data.password, user.password);
+
     if (!isMatch) {
       throw new Error("WRONG_PASSWORD");
     }
-    const tempSessionId = crypto.randomUUID();
-
-    const refreshToken = generateRefreshToken({
-      id: user.id,
-      sessionId: tempSessionId,
-    });
-
-    const tokenHash = hashToken(refreshToken);
 
     const session = await authRepository.createSession({
       userId: user.id,
-      tokenHash,
+      tokenHash: "",
       ipAddress: meta.ip,
       userAgent: meta.userAgent,
       device: meta.device ?? "Unknown Device",
       expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
     });
 
-    const accessToken = generateAccessToken({
+    const refreshToken = generateRefreshToken({
       id: user.id,
-      role: user.role,
-      orgId: user.orgId,
       sessionId: session.id,
     });
 
@@ -98,14 +91,18 @@ export const authService = {
       hashToken(refreshToken),
     );
 
+    const accessToken = generateAccessToken({
+      id: user.id,
+      role: user.role,
+      sessionId: session.id,
+    });
+
     return {
       user: {
         id: user.id,
-        name: user.name ?? "",
+        name: user.name,
         email: user.email,
-        // role: user.role,
-        orgId: user.orgId,
-        // isActive: false,
+        role: user.role,
       },
       accessToken,
       refreshToken,
@@ -140,7 +137,6 @@ export const authService = {
     const accessToken = generateAccessToken({
       id: user.id,
       role: user.role,
-      orgId: user.orgId,
       sessionId: session.id,
     });
 
