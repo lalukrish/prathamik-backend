@@ -1,7 +1,5 @@
 import { z } from "zod";
 
-import { applyJobSchema }
-    from "./public.validator";
+import { applyJobSchema } from "./public.validator";
 
-export type ApplyJobDTO =
-    z.infer<typeof applyJobSchema>["body"];
+export type ApplyJobDTO = z.infer<typeof applyJobSchema>["body"];

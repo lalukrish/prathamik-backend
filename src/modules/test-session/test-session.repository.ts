@@ -217,6 +217,29 @@ export class TestSessionRepository {
       where: { sessionId },
     });
   }
+  async findActiveUserPass(userId: string) {
+    return prisma.userPass.findFirst({
+      where: {
+        userId,
+        status: "ACTIVE",
+        OR: [{ expiresAt: null }, { expiresAt: { gt: new Date() } }],
+      },
+    });
+  }
+
+  async findEnrollment(userId: string, mockTestId: string) {
+    return prisma.userTestEnrollment.findUnique({
+      where: { userId_mockTestId: { userId, mockTestId } },
+    });
+  }
+  async getUserEnrollments(userId: string) {
+    return prisma.userTestEnrollment.findMany({
+      where: {
+        userId,
+        OR: [{ expiresAt: null }, { expiresAt: { gt: new Date() } }],
+      },
+    });
+  }
 }
 
 export const testSessionRepository = new TestSessionRepository();

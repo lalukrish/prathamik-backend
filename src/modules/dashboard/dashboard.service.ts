@@ -16,7 +16,9 @@ interface SubjectBreakdown {
 function buildSessionSummary(session: any) {
   const questions = session.mockTest.questions;
   const answers = session.answers;
-  const answerMap = new Map(answers.map((a: any) => [a.questionId, a]));
+  const answerMap = new Map<string, any>(
+    answers.map((a: any) => [a.questionId, a]),
+  );
 
   let positiveScore = 0;
   let negativeScore = 0;

@@ -21,7 +21,7 @@ export const studyGroupController = {
 
   async getByCategory(req: Request, res: Response) {
     try {
-      const { category } = req.params;
+      const category = req.params?.category as string;
       const page = Number(req.query.page ?? 1);
       const limit = Number(req.query.limit ?? 10);
       const result = await studyGroupService.getByCategory(
@@ -38,7 +38,7 @@ export const studyGroupController = {
   async vote(req: Request, res: Response) {
     try {
       const userId = req.user!.userId;
-      const { topicId } = req.params;
+      const topicId = req.params?.topicId as string;
       const { importance } = req.body;
       const result = await studyGroupService.vote(userId, topicId, importance);
       res.status(200).json({ success: true, data: result });
@@ -50,7 +50,7 @@ export const studyGroupController = {
   async removeVote(req: Request, res: Response) {
     try {
       const userId = req.user!.userId;
-      const { topicId } = req.params;
+      const topicId = req.params?.topicId as string;
       const result = await studyGroupService.removeVote(userId, topicId);
       res.status(200).json({ success: true, data: result });
     } catch (error: any) {

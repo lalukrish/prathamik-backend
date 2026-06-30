@@ -20,7 +20,7 @@ export const transactionController = {
 
   async confirmDummy(req: Request, res: Response) {
     try {
-      const { transactionId } = req.params;
+      const transactionId = req.params.transactionId as string;
       const result = await transactionService.confirmDummy(transactionId);
       res.status(200).json({ success: true, data: result });
     } catch (error: any) {

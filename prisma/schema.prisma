@@ -87,6 +87,13 @@ enum TopicImportance {
 }
 
 
+enum PassStatus {
+  ACTIVE
+  EXPIRED
+  REFUNDED
+}
+
+
 model AuthSession {
   id String @id @default(uuid())
 
@@ -130,6 +137,7 @@ model User {
   transactions Transaction[]
   studyTopics  StudyTopic[]
   topicVotes   TopicVote[]
+  userPasses   UserPass[]
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
@@ -329,12 +337,13 @@ model Transaction {
   userId            String
   user              User          @relation(fields: [userId], references: [id])
 
-  mockTestId        String
-  mockTest          MockTest      @relation(fields: [mockTestId], references: [id])
+  mockTestId        String?
+  mockTest          MockTest?  @relation(fields: [mockTestId], references: [id])  // ← add ? here 
 
   amount            Float
   currency          String        @default("INR")
-
+  passId            String?               // ← add this
+  pass              Pass?      @relation(fields: [passId], references: [id])
   status            PaymentStatus @default(PENDING)
 
   // Razorpay fields (nullable until payment happens)
@@ -356,12 +365,9 @@ model StudyTopic {
   user        User                @relation(fields: [userId], references: [id])
 
   category    StudyGroupCategory
-
   title       String
   content     String              // HTML from Lexical editor
-
   votes       TopicVote[]
-
   createdAt   DateTime            @default(now())
   updatedAt   DateTime            @updatedAt
 
@@ -386,4 +392,42 @@ model TopicVote {
 
   @@unique([userId, topicId])   // one vote per user per topic
   @@index([topicId])
+}
+
+
+model Pass {
+  id          String   @id @default(uuid())
+  name        String                        // e.g. "All Access Pass"
+  description String?
+  price       Float                         // e.g. 99.0
+  currency    String   @default("INR")
+  isActive    Boolean  @default(true)       // admin can disable a pass
+
+  // null = lifetime, otherwise days from purchase
+  validityDays Int?
+
+  userPasses  UserPass[]
+  transactions Transaction[]
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+
+model UserPass {
+  id        String     @id @default(uuid())
+
+  userId    String
+  user      User       @relation(fields: [userId], references: [id])
+
+  passId    String
+  pass      Pass       @relation(fields: [passId], references: [id])
+
+  status    PassStatus @default(ACTIVE)
+
+  grantedAt DateTime   @default(now())
+  expiresAt DateTime?  // null = lifetime
+
+  @@unique([userId, passId])
+  @@index([userId])
 }

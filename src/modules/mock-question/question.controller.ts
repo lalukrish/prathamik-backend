@@ -22,7 +22,7 @@ export class QuestionController {
   getQuestions = async (req: Request, res: Response) => {
     try {
       const questions = await questionService.getQuestions(
-        req.params.mockTestId,
+        req.params.mockTestId as string,
       );
 
       res.json({
@@ -39,7 +39,7 @@ export class QuestionController {
 
   deleteQuestion = async (req: Request, res: Response) => {
     try {
-      await questionService.deleteQuestion(req.params.id);
+      await questionService.deleteQuestion(req.params?.id as string);
 
       res.json({
         success: true,

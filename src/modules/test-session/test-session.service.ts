@@ -89,8 +89,23 @@ import { TestStatus } from "@prisma/client";
 import { testSessionRepository } from "./test-session.repository";
 
 export class TestSessionService {
-  async getAvailableTests() {
-    return testSessionRepository.getPublishedTests();
+  async getAvailableTests(userId: string) {
+    const tests = await testSessionRepository.getPublishedTests();
+
+    const [enrollments, activePass] = await Promise.all([
+      testSessionRepository.getUserEnrollments(userId),
+      testSessionRepository.findActiveUserPass(userId),
+    ]);
+
+    const enrolledTestIds = new Set(enrollments.map((e) => e.mockTestId));
+
+    return tests.map((test) => ({
+      ...test,
+      hasAccess:
+        test.accessMode === "FREE" ||
+        !!activePass ||
+        enrolledTestIds.has(test.id),
+    }));
   }
 
   async startTest(userId: string, mockTestId: string) {
@@ -99,6 +114,30 @@ export class TestSessionService {
     if (!mockTest) {
       throw new Error("Mock test not found");
     }
+
+    // ── Access check ─────────────────────────────────────────────
+    if (mockTest.accessMode === "PAID") {
+      // 1. individual enrollment
+      const enrollment = await testSessionRepository.findEnrollment(
+        userId,
+        mockTestId,
+      );
+      const hasEnrollment =
+        enrollment &&
+        (!enrollment.expiresAt || enrollment.expiresAt > new Date());
+
+      // 2. active pass (covers all paid tests)
+      const hasPass = !hasEnrollment
+        ? await testSessionRepository.findActiveUserPass(userId)
+        : null;
+
+      if (!hasEnrollment && !hasPass) {
+        throw new Error(
+          "Access denied — purchase the test or a pass to continue",
+        );
+      }
+    }
+    //
 
     const remainingSeconds = mockTest.durationMinutes * 60;
 

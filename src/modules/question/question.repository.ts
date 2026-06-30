@@ -5,9 +5,9 @@ export class QuestionRepository {
     return prisma.question.create({
       data: {
         mockTestId: data.mockTestId,
+        subjectId: data.subjectId,
         question: data.question,
         type: data.type,
-
         options: {
           create: data.options,
         },

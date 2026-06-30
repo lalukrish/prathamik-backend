@@ -28,7 +28,7 @@ export class SubjectController {
   };
 
   delete = async (req: Request, res: Response) => {
-    await subjectService.deleteSubject(req.params.id);
+    await subjectService.deleteSubject(req.params?.id as string);
 
     res.json({
       success: true,

@@ -27,8 +27,8 @@ export const testSessionController = {
   // POST /start/:mockTestId
   async startTest(req: Request, res: Response) {
     try {
-      const userId = req.user.id;
-      const { mockTestId } = req.params;
+      const userId = req.user?.userId as string;
+      const mockTestId = req.params.mockTestId as string;
 
       const result = await testSessionService.startTest(userId, mockTestId);
       res.status(201).json({ success: true, data: result });
@@ -40,8 +40,8 @@ export const testSessionController = {
   // GET /:sessionId
   async getSession(req: Request, res: Response) {
     try {
-      const userId = req.user.id;
-      const { sessionId } = req.params;
+      const userId = req.user?.userId as string;
+      const sessionId = req.params.sessionId as string;
 
       const session = await testSessionService.getSession(sessionId, userId);
       res.json({ success: true, data: session });
@@ -53,17 +53,15 @@ export const testSessionController = {
   // POST /:sessionId/answer
   async submitAnswer(req: Request, res: Response) {
     try {
-      const userId = req.user.id;
-      const { sessionId } = req.params;
+      const userId = req.user?.userId as string;
+      const sessionId = req.params.sessionId as string;
       const { questionId, selectedOptionId } = req.body;
 
       if (!questionId || !selectedOptionId) {
-        return res
-          .status(400)
-          .json({
-            success: false,
-            message: "questionId and selectedOptionId are required.",
-          });
+        return res.status(400).json({
+          success: false,
+          message: "questionId and selectedOptionId are required.",
+        });
       }
 
       const result = await testSessionService.submitAnswer(
@@ -81,8 +79,8 @@ export const testSessionController = {
   // PATCH /pause/:sessionId
   async pauseTest(req: Request, res: Response) {
     try {
-      const userId = req.user.id;
-      const { sessionId } = req.params;
+      const userId = req.user?.userId as string;
+      const sessionId = req.params.sessionId as string;
 
       const result = await testSessionService.pauseTest(sessionId, userId);
       res.json({ success: true, data: result });
@@ -94,8 +92,8 @@ export const testSessionController = {
   // PATCH /resume/:sessionId
   async resumeTest(req: Request, res: Response) {
     try {
-      const userId = req.user.id;
-      const { sessionId } = req.params;
+      const userId = req.user?.userId as string;
+      const sessionId = req.params.sessionId as string;
 
       const result = await testSessionService.resumeTest(sessionId, userId);
       res.json({ success: true, data: result });
@@ -107,8 +105,8 @@ export const testSessionController = {
   // POST /:sessionId/submit
   async submitTest(req: Request, res: Response) {
     try {
-      const userId = req.user.id;
-      const { sessionId } = req.params;
+      const userId = req.user?.userId as string;
+      const sessionId = req.params.sessionId as string;
       const isAutoSubmit = Boolean(req.body?.isAutoSubmit);
 
       const result = await testSessionService.submitTest(
@@ -125,8 +123,10 @@ export const testSessionController = {
   // GET /result/:sessionId
   async getResult(req: Request, res: Response) {
     try {
-      const userId = req.user.id;
-      const { sessionId } = req.params;
+      console.log("res", req.user);
+
+      const userId = req.user?.userId as string;
+      const sessionId = req.params.sessionId as string;
 
       const result = await testSessionService.getResult(sessionId, userId);
       res.json({ success: true, data: result });

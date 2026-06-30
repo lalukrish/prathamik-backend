@@ -15,6 +15,7 @@ export class DashboardController {
     req: Request<{ sessionId: string }>,
     res: Response,
   ) => {
+    console.log("res", req.user);
     const result = await dashboardService.getTestResult(
       req.params.sessionId,
       req.user!.userId,

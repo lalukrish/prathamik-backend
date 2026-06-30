@@ -18,10 +18,9 @@ export const uploadResumeToStorage = async (
     throw new Error(error.message);
   }
 
-  const { data: signedUrlData, error: signedUrlError } =
-    await supabase.storage
-      .from("i-bucket")
-      .createSignedUrl(filePath, 3600);
+  const { data: signedUrlData, error: signedUrlError } = await supabase.storage
+    .from("i-bucket")
+    .createSignedUrl(filePath, 3600);
 
   if (signedUrlError) {
     console.error("SIGNED URL ERROR:", signedUrlError);

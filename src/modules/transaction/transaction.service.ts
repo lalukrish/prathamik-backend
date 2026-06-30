@@ -22,7 +22,7 @@ export const transactionService = {
     if (txn.status === "SUCCESS") throw new Error("Already confirmed.");
 
     await transactionRepository.updateStatus(transactionId, "SUCCESS");
-    await enrollmentRepository.create(txn.userId, txn.mockTestId);
+    await enrollmentRepository.create(txn.userId, txn.mockTestId as string);
 
     return { message: "Payment confirmed. Access granted." };
   },

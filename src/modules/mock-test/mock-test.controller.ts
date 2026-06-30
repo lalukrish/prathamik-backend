@@ -13,7 +13,7 @@ export class MockTestController {
           ...req.body,
           thumbnail,
         },
-        req.user.userId,
+        req.user?.userId as string,
       );
 
       logger.info({
@@ -53,17 +53,13 @@ export class MockTestController {
 
   getMockTestById = async (req: Request<{ id: string }>, res: Response) => {
     try {
-      const test = await mockTestService.getMockTestById(req.params.id);
-
-      res.status(200).json({
-        success: true,
-        data: test,
-      });
+      const test = await mockTestService.getMockTestById(
+        req.params.id,
+        req.user!.userId,
+      );
+      res.status(200).json({ success: true, data: test });
     } catch (err: any) {
-      res.status(404).json({
-        success: false,
-        message: err.message,
-      });
+      res.status(404).json({ success: false, message: err.message });
     }
   };
 

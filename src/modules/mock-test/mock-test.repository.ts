@@ -75,7 +75,21 @@ export class MockTestRepository {
       },
     });
   }
+  async findEnrollment(userId: string, mockTestId: string) {
+    return prisma.userTestEnrollment.findUnique({
+      where: { userId_mockTestId: { userId, mockTestId } },
+    });
+  }
 
+  async findActiveUserPass(userId: string) {
+    return prisma.userPass.findFirst({
+      where: {
+        userId,
+        status: "ACTIVE",
+        OR: [{ expiresAt: null }, { expiresAt: { gt: new Date() } }],
+      },
+    });
+  }
   async update(
     id: string,
     data: {

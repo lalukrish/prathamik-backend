@@ -3,7 +3,8 @@ import { testSessionService } from "./test-session.service";
 
 export class TestSessionController {
   getAvailableTests = async (req: Request, res: Response) => {
-    const tests = await testSessionService.getAvailableTests();
+    const userId = req.user?.userId as string;
+    const tests = await testSessionService.getAvailableTests(userId);
 
     res.json({
       success: true,

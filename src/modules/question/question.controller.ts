@@ -31,7 +31,7 @@ export class QuestionController {
     res: Response,
   ) => {
     try {
-      const questions = await questionService.(
+      const questions = await questionService.getQuestionsByMockTest(
         req.params.mockTestId,
       );
 
