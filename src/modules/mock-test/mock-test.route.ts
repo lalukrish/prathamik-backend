@@ -17,6 +17,8 @@ router.post(
 
 router.get("/", authMiddleware, mockTestController.getAllMockTests);
 
+router.get("/search", authMiddleware, mockTestController.searchMockTests);
+
 router.get("/:id", authMiddleware, mockTestController.getMockTestById);
 
 router.put(

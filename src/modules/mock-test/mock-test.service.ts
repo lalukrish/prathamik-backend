@@ -15,6 +15,16 @@ export class MockTestService {
     });
   }
 
+  async searchMockTests(query: string, page: number, limit: number) {
+    console.log("first", query);
+
+    if (!query || !query.trim()) {
+      return mockTestRepository.findAll(page, limit); // fallback to normal list if empty
+    }
+    console.log("first", query);
+    return mockTestRepository.search(query.trim(), page, limit);
+  }
+
   async getAllMockTests(page = 1, limit = 10) {
     return mockTestRepository.findAll(page, limit);
   }

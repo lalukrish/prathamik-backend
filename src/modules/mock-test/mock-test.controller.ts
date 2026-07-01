@@ -50,6 +50,26 @@ export class MockTestController {
       });
     }
   };
+  searchMockTests = async (req: Request, res: Response) => {
+    try {
+      const query = (req.query.q as string) || "";
+      const page = parseInt(req.query.page as string) || 1;
+      const limit = parseInt(req.query.limit as string) || 10;
+      console.log("first", query);
+
+      const result = await mockTestService.searchMockTests(query, page, limit);
+
+      res.status(200).json({
+        success: true,
+        data: result,
+      });
+    } catch (err: any) {
+      res.status(500).json({
+        success: false,
+        message: err.message,
+      });
+    }
+  };
 
   getMockTestById = async (req: Request<{ id: string }>, res: Response) => {
     try {
