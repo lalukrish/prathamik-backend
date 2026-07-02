@@ -1,13 +1,12 @@
-// import { findInterviewByToken } from './../interviews/interview.repository';
-import { prisma } from "../../config/db";
-import { ApplyJobDTO } from "./public.types";
-import { uploadResumeToStorage } from "./resume.service";
-// import { applicationQueue } from "../applications/application.queue";
-// import { JobRepository } from "../jobs/job.repository";
-import { PublicRepo } from "./public.repository";
-// import { SecurityEventType } from '@prisma/client';
-// import { interviewEvaluationQueue } from '../../queues/interview-evaluation.queue';
+import { publicRepo } from "./public.repository";
 
-// const jobRepo = new JobRepository();
-// const publicRepo = new PublicRepo()
-export class PublicService {}
+export class PublicService {
+  async searchMockTestsPublic(query: string, page: number, limit: number) {
+    if (!query || !query.trim()) {
+      return publicRepo.findAllPublic(page, limit);
+    }
+    return publicRepo.searchPublic(query.trim(), page, limit); // fixed typo: searchPubli -> searchPublic
+  }
+}
+
+export const publicService = new PublicService();

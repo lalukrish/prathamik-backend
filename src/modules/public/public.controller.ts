@@ -1,7 +1,31 @@
 import { Request, Response } from "express";
-import { PublicService } from "./public.service";
-import { ApplyJobDTO } from "./public.types";
+import { publicService } from "./public.service";
 
-const publicService = new PublicService();
+export class PublicController {
+  searchMockTestsPublic = async (req: Request, res: Response) => {
+    try {
+      console.log("first");
+      const query = (req.query.q as string) || "";
+      const page = parseInt(req.query.page as string) || 1;
+      const limit = parseInt(req.query.limit as string) || 10;
 
-export class PublicController {}
+      const result = await publicService.searchMockTestsPublic(
+        query,
+        page,
+        limit,
+      );
+
+      res.status(200).json({
+        success: true,
+        data: result,
+      });
+    } catch (err: any) {
+      res.status(500).json({
+        success: false,
+        message: err.message,
+      });
+    }
+  };
+}
+
+export const publicController = new PublicController();

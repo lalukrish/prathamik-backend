@@ -20,6 +20,7 @@ import users from "../modules/user/Users.routes";
 import results from "../modules/result/result.routes";
 import transaction from "../modules/transaction/transaction.routes";
 import studyGroup from "../modules/study-group/studygroup.routes";
+import publicRoutes from "../modules/public/public.routes";
 
 const router = Router();
 
@@ -45,6 +46,8 @@ router.use("/dashboard/", dashboard);
 router.use("/users/", users);
 router.use("/transactions/", transaction);
 router.use("/study-groups/", studyGroup);
+
+router.use("/public/", publicRoutes);
 
 // public routes
 // router.use("/public", publicRoutes);

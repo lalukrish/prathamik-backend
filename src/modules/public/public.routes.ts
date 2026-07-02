@@ -1,7 +1,8 @@
 import { Router } from "express";
-import { PublicController } from "./public.controller";
-import { validate } from "../../middlewares/validation.middleware";
-import { applyJobSchema } from "./public.validator";
-import { upload } from "../../middlewares/upload.middleware";
+import { publicController } from "./public.controller";
+
 const router = Router();
-const controller = new PublicController();
+
+router.get("/search", publicController.searchMockTestsPublic);
+
+export default router;
